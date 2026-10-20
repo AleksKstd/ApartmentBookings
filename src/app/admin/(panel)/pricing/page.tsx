@@ -27,7 +27,7 @@ export default async function PricingPage() {
               <Field label="Отстъпка за 7+ нощи (%)" name="weeklyDiscountPercent" type="number" min={0} max={90} defaultValue={p.weeklyDiscountPercent} required />
               <Field label="Отстъпка за 28+ нощи (%)" name="monthlyDiscountPercent" type="number" min={0} max={90} defaultValue={p.monthlyDiscountPercent} required />
               <Field label="Резервации до (дни напред)" name="bookingWindowDays" type="number" min={7} max={1095} defaultValue={p.bookingWindowDays} required />
-              <Field label="Задържане при плащане (мин.)" name="holdMinutes" type="number" min={30} max={1440} defaultValue={p.holdMinutes} required hint="Минимум 30 (ограничение на Stripe)" />
+              <Field label="Задържане при плащане (мин.)" name="holdMinutes" type="number" min={32} max={1440} defaultValue={p.holdMinutes} required hint="Минимум 32 (Stripe изисква сесия от поне 30 мин.)" />
             </div>
           </AdminForm>
         </Panel>

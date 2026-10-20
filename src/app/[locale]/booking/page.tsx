@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { BookingWidget } from "@/components/booking/booking-widget";
 import { getDictionary, isLocale } from "@/i18n";
 import { occupiedNights } from "@/lib/availability";
-import { loadAvailabilityContext } from "@/lib/booking-service";
+import { HOLD_MINIMUM_MINUTES, loadAvailabilityContext } from "@/lib/booking-service";
 import { addDays, isIsoDate } from "@/lib/dates";
 import { getSiteData } from "@/lib/site";
 import { isStripeConfigured } from "@/lib/stripe";
@@ -42,7 +42,7 @@ export default async function BookingPage({ params, searchParams }: PageProps<"/
             .filter((s) => s.minNights != null && s.endDate >= today)
             .map((s) => ({ startDate: s.startDate, endDate: s.endDate, minNights: s.minNights! }))}
           paymentsEnabled={isStripeConfigured()}
-          holdMinutes={Math.max(30, settings.pricing.holdMinutes)}
+          holdMinutes={Math.max(HOLD_MINIMUM_MINUTES, settings.pricing.holdMinutes)}
           initial={{
             checkIn: initialIn && isIsoDate(initialIn) && initialIn >= today ? initialIn : undefined,
             checkOut: initialOut && isIsoDate(initialOut) && initialIn && initialOut > initialIn ? initialOut : undefined,

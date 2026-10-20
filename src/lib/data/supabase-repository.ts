@@ -310,6 +310,7 @@ export class SupabaseRepository implements Repository {
         .from("bookings")
         .update({ status: "cancelled", cancelled_at: now.toISOString(), admin_note: "Payment hold expired" })
         .eq("status", "awaiting_payment")
+        .neq("payment_status", "paid")
         .lte("hold_expires_at", now.toISOString())
         .select("id"),
     ) as Row[];

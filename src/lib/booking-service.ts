@@ -23,6 +23,8 @@ export class BookingError extends Error {
   }
 }
 
+export const HOLD_MINIMUM_MINUTES = 32;
+
 const REFERENCE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 export function generateReference(): string {
@@ -79,7 +81,9 @@ export async function createGuestBooking(input: BookingRequest): Promise<{ redir
   const quote = await quoteStay(input.checkIn, input.checkOut, input.guests);
   const { pricing, property } = await repo.getSettings();
   const usePayments = isStripeConfigured();
-  const holdMinutes = Math.max(30, pricing.holdMinutes); // Stripe sessions live at least 30 minutes
+  // Stripe requires a Checkout session to live at least 30 minutes; the session expires one minute
+  // before the hold so a guest can never pay for dates that were already released.
+  const holdMinutes = Math.max(HOLD_MINIMUM_MINUTES, pricing.holdMinutes);
 
   const draft: NewBooking = {
     reference: generateReference(),
@@ -127,7 +131,7 @@ export async function createGuestBooking(input: BookingRequest): Promise<{ redir
       customer_email: booking.guestEmail,
       client_reference_id: booking.id,
       locale: booking.locale === "bg" ? "bg" : "en",
-      expires_at: Math.floor(new Date(booking.holdExpiresAt!).getTime() / 1000),
+      expires_at: Math.floor(new Date(booking.holdExpiresAt!).getTime() / 1000) - 60,
       line_items: [
         {
           quantity: 1,

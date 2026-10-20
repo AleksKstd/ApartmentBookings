@@ -133,7 +133,7 @@ export async function cancelBooking(id: string, formData: FormData): Promise<Act
 
 export async function markBookingPaid(id: string): Promise<ActionResult> {
   return guarded(async () => {
-    await getRepository().updateBooking(id, { paymentStatus: "paid" });
+    await getRepository().updateBooking(id, { paymentStatus: "paid", holdExpiresAt: null });
     refreshEverything();
     return ok("Отбелязана като платена.");
   });
@@ -314,7 +314,7 @@ export async function savePricing(_prev: ActionResult | null, formData: FormData
       weeklyDiscountPercent: intField(formData, "weeklyDiscountPercent", 0, 90),
       monthlyDiscountPercent: intField(formData, "monthlyDiscountPercent", 0, 90),
       bookingWindowDays: intField(formData, "bookingWindowDays", 7, 1095),
-      holdMinutes: intField(formData, "holdMinutes", 30, 1440),
+      holdMinutes: intField(formData, "holdMinutes", 32, 1440),
     };
     if (pricing.baseNightly <= 0) return fail("Основната цена трябва да е по-голяма от 0.");
     if (pricing.minNights > pricing.maxNights) return fail("Минималният престой не може да е по-дълъг от максималния.");

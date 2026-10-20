@@ -56,13 +56,3 @@ export function validateStayDates(
   if (ranges.some((r) => rangesOverlap(checkIn, checkOut, r.start, r.end))) return "unavailable";
   return null;
 }
-
-/** The first occupied night on or after `checkIn` — guests may check out on that day at the latest. */
-export function latestCheckOut(checkIn: string, ranges: OccupiedRange[]): string | null {
-  let best: string | null = null;
-  for (const r of ranges) {
-    const candidate = r.start >= checkIn ? r.start : r.end > checkIn ? checkIn : null;
-    if (candidate && (best === null || candidate < best)) best = candidate;
-  }
-  return best;
-}

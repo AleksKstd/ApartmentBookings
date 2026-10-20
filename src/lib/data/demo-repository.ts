@@ -250,7 +250,7 @@ export class DemoRepository implements Repository {
     return this.write((db) => {
       let count = 0;
       for (const b of db.bookings) {
-        if (b.status === "awaiting_payment" && b.holdExpiresAt && new Date(b.holdExpiresAt) <= now) {
+        if (b.status === "awaiting_payment" && b.paymentStatus !== "paid" && b.holdExpiresAt && new Date(b.holdExpiresAt) <= now) {
           b.status = "cancelled";
           b.cancelledAt = now.toISOString();
           b.updatedAt = now.toISOString();

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bookingBlocksCalendar, latestCheckOut, occupiedNights, occupiedRanges, validateStayDates } from "@/lib/availability";
+import { bookingBlocksCalendar, occupiedNights, occupiedRanges, validateStayDates } from "@/lib/availability";
 import { addDays, diffDays, eachNight, isIsoDate, rangesOverlap, todayAtProperty } from "@/lib/dates";
 
 describe("dates", () => {
@@ -64,11 +64,5 @@ describe("availability", () => {
     expect(validateStayDates("2028-06-01", "2028-06-03", ranges, opts)).toBe("too_far");
     expect(validateStayDates("2027-05-03", "2027-05-03", ranges, opts)).toBe("invalid_dates");
     expect(validateStayDates("bad", "2027-05-03", ranges, opts)).toBe("invalid_dates");
-  });
-
-  it("finds the latest possible check-out", () => {
-    expect(latestCheckOut("2027-05-01", ranges)).toBe("2027-05-10");
-    expect(latestCheckOut("2027-05-14", ranges)).toBe("2027-05-25");
-    expect(latestCheckOut("2027-05-30", ranges)).toBeNull();
   });
 });

@@ -97,7 +97,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     weeklyDiscountPercent: 10,
     monthlyDiscountPercent: 25,
     bookingWindowDays: 365,
-    holdMinutes: 30,
+    holdMinutes: 32,
   },
 };
 
