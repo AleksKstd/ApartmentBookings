@@ -12,6 +12,7 @@ import { BookingConflictError, getRepository, isDemoMode } from "@/lib/data";
 import { AMENITY_KEYS } from "@/lib/data/defaults";
 import { diffDays, isIsoDate, rangesOverlap } from "@/lib/dates";
 import { sendGuestEmail } from "@/lib/email";
+import { MAX_UPLOAD_BYTES, extensionFor, sniffImageType } from "@/lib/image-sniff";
 import { PricingError, calculateQuote } from "@/lib/pricing";
 import { clientIp, rateLimit, resetRateLimit } from "@/lib/rate-limit";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
@@ -355,21 +356,6 @@ export async function deleteSeasonalRate(id: string): Promise<ActionResult> {
 // Media
 // ---------------------------------------------------------------------------
 
-const ALLOWED_IMAGE_TYPES: Record<string, number[][]> = {
-  "image/jpeg": [[0xff, 0xd8, 0xff]],
-  "image/png": [[0x89, 0x50, 0x4e, 0x47]],
-  "image/webp": [[0x52, 0x49, 0x46, 0x46]], // "RIFF" (+ "WEBP" at offset 8, checked below)
-  "image/avif": [], // ftyp box checked below
-};
-const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
-
-function sniffImage(bytes: Uint8Array, declared: string): boolean {
-  const ascii = (from: number, to: number) => String.fromCharCode(...bytes.slice(from, to));
-  if (declared === "image/webp") return ascii(0, 4) === "RIFF" && ascii(8, 12) === "WEBP";
-  if (declared === "image/avif") return ascii(4, 8) === "ftyp" && /avi[fs]/.test(ascii(8, 12));
-  return (ALLOWED_IMAGE_TYPES[declared] ?? []).some((sig) => sig.every((b, i) => bytes[i] === b));
-}
-
 export async function uploadMedia(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   return guarded(async () => {
     const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
@@ -381,11 +367,12 @@ export async function uploadMedia(_prev: ActionResult | null, formData: FormData
     const rejected: string[] = [];
     for (const file of files) {
       const bytes = new Uint8Array(await file.arrayBuffer());
-      if (!(file.type in ALLOWED_IMAGE_TYPES) || file.size > MAX_UPLOAD_BYTES || !sniffImage(bytes, file.type)) {
+      const type = sniffImageType(bytes);
+      if (!type || file.size > MAX_UPLOAD_BYTES) {
         rejected.push(file.name);
         continue;
       }
-      const stored = await repo.uploadMediaFile({ fileName: file.name, contentType: file.type, bytes });
+      const stored = await repo.uploadMediaFile({ fileName: `photo.${extensionFor(type)}`, contentType: type, bytes });
       await repo.createMedia({
         url: stored.url,
         storagePath: stored.storagePath,
@@ -398,6 +385,42 @@ export async function uploadMedia(_prev: ActionResult | null, formData: FormData
     refreshEverything();
     const note = rejected.length ? ` Отхвърлени (позволени са JPG, PNG, WebP, AVIF до 10 MB): ${rejected.join(", ")}` : "";
     return uploaded ? ok(`Качени снимки: ${uploaded}.${note}`) : fail(`Няма качени снимки.${note}`);
+  });
+}
+
+/**
+ * Production (Supabase) uploads go straight from the browser to Storage through a short-lived
+ * signed URL, so photo size is not limited by the hosting platform's request body limit.
+ */
+export async function createUploadTarget(contentType: string, size: number): Promise<ActionResult & { signedUrl?: string; storagePath?: string }> {
+  return guarded(async () => {
+    const ext = extensionFor(contentType);
+    if (!ext || size <= 0 || size > MAX_UPLOAD_BYTES) return fail("Позволени са JPG, PNG, WebP и AVIF до 10 MB.");
+    const repo = getRepository();
+    if (!repo.createUploadTarget) return fail("Директното качване не се поддържа в демо режим.");
+    const target = await repo.createUploadTarget(ext);
+    return { ok: true, message: "", ...target };
+  });
+}
+
+export async function finalizeUpload(storagePath: string, alt: { bg: string; en: string }, inCarousel: boolean): Promise<ActionResult> {
+  return guarded(async () => {
+    const repo = getRepository();
+    if (!repo.readUploadedFile || !/^photos\/[a-f0-9-]{36}\.(jpg|png|webp|avif)$/.test(storagePath)) return fail("Невалиден файл.");
+    const bytes = await repo.readUploadedFile(storagePath);
+    if (!bytes || bytes.length > MAX_UPLOAD_BYTES || sniffImageType(bytes) !== `image/${storagePath.endsWith(".jpg") ? "jpeg" : storagePath.split(".").pop()}`) {
+      await repo.deleteMediaFile(storagePath).catch(() => undefined);
+      return fail("Файлът не е валидна снимка и беше изтрит.");
+    }
+    await repo.createMedia({
+      url: repo.publicMediaUrl!(storagePath),
+      storagePath,
+      alt: { bg: alt.bg.slice(0, 200), en: alt.en.slice(0, 200) },
+      inCarousel,
+      inGallery: true,
+    });
+    refreshEverything();
+    return ok("Качено.");
   });
 }
 

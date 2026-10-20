@@ -50,5 +50,6 @@ function withLocaleHeader(request: NextRequest, locale: string) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|.*\\..*).*)"],
+  // Admin paths are always matched (even with dots); public paths skip assets and API routes.
+  matcher: ["/admin/:path*", "/admin", "/((?!api|_next/static|_next/image|admin|.*\\..*).*)"],
 };

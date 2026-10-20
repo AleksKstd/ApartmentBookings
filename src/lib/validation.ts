@@ -7,7 +7,12 @@ export const bookingRequestSchema = z.object({
   checkIn: isoDay,
   checkOut: isoDay,
   guests: z.coerce.number().int().min(1).max(50),
-  guestName: z.string().trim().min(2, "name").max(120, "name"),
+  guestName: z
+    .string()
+    .trim()
+    .min(2, "name")
+    .max(120, "name")
+    .regex(/^[^\u0000-\u001f\u007f<>]+$/, "name"),
   guestEmail: z.string().trim().toLowerCase().max(254, "email").pipe(z.email("email")),
   guestPhone: z
     .string()

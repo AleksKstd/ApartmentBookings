@@ -25,10 +25,19 @@ describe("session tokens", () => {
 describe("password hashing", () => {
   it("verifies scrypt hashes", async () => {
     const hash = await hashPassword("correct horse battery staple");
-    expect(hash.startsWith("scrypt$")).toBe(true);
+    expect(hash.startsWith("scrypt:")).toBe(true);
+    expect(hash).not.toContain("$"); // .env files would expand it
     expect(await verifyPassword("correct horse battery staple", hash)).toBe(true);
     expect(await verifyPassword("wrong", hash)).toBe(false);
     expect(await verifyPassword("anything", "plain-text")).toBe(false);
+  });
+});
+
+describe("hash-password script", () => {
+  it("produces hashes the app accepts", async () => {
+    const { execFileSync } = await import("node:child_process");
+    const out = execFileSync("node", ["scripts/hash-password.mjs", "a long enough password"], { encoding: "utf8" }).trim();
+    expect(await verifyPassword("a long enough password", out)).toBe(true);
   });
 });
 

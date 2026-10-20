@@ -138,11 +138,6 @@ const toFeed = (r: Row): CalendarFeed => ({
   lastEventCount: r.last_event_count,
 });
 
-/** Escapes a value for use inside a PostgREST `or=(…)` filter. */
-function orValue(value: string): string {
-  return `"${value.replace(/["\\]/g, "\\$&")}"`;
-}
-
 export class SupabaseRepository implements Repository {
   readonly mode = "supabase" as const;
   private db: SupabaseClient;
@@ -244,6 +239,22 @@ export class SupabaseRepository implements Repository {
     return { url: data.publicUrl, storagePath };
   }
 
+  async createUploadTarget(extension: string) {
+    const storagePath = `photos/${randomUUID()}.${extension}`;
+    const data = check(await this.db.storage.from(MEDIA_BUCKET).createSignedUploadUrl(storagePath));
+    return { signedUrl: data.signedUrl, storagePath };
+  }
+
+  async readUploadedFile(storagePath: string) {
+    const { data, error } = await this.db.storage.from(MEDIA_BUCKET).download(storagePath);
+    if (error || !data) return null;
+    return new Uint8Array(await data.arrayBuffer());
+  }
+
+  publicMediaUrl(storagePath: string) {
+    return this.db.storage.from(MEDIA_BUCKET).getPublicUrl(storagePath).data.publicUrl;
+  }
+
   async deleteMediaFile(storagePath: string) {
     check(await this.db.storage.from(MEDIA_BUCKET).remove([storagePath]));
   }
@@ -254,10 +265,10 @@ export class SupabaseRepository implements Repository {
     if (filter.to) q = q.lt("check_in", filter.to);
     if (filter.from) q = q.gt("check_out", filter.from);
     if (filter.search) {
-      const term = orValue(`%${filter.search.replace(/[%_]/g, "\\$&")}%`);
-      q = q.or(
-        ["reference", "guest_name", "guest_email", "guest_phone"].map((c) => `${c}.ilike.${term}`).join(","),
-      );
+      // Keep only characters that are meaningful in names, emails, phones and references, so the
+      // term can never alter the PostgREST filter syntax or act as a LIKE wildcard.
+      const term = filter.search.replace(/[^\p{L}\p{N}@.+\- ]/gu, "").trim();
+      if (term) q = q.or(["reference", "guest_name", "guest_email", "guest_phone"].map((c) => `${c}.ilike.*${term}*`).join(","));
     }
     if (filter.limit) q = q.limit(filter.limit);
     return (check(await q) as Row[]).map(toBooking);

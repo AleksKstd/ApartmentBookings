@@ -16,7 +16,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${supabaseOrigin}`.trim(),
   "font-src 'self' data:",
-  `connect-src 'self'${isDev ? " ws:" : ""}`,
+  `connect-src 'self' ${supabaseOrigin}${isDev ? " ws:" : ""}`.replace(/\s+/g, " ").trim(),
   "frame-src https://www.openstreetmap.org",
   "frame-ancestors 'none'",
   "form-action 'self' https://checkout.stripe.com",

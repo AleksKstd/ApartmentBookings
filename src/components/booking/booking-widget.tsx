@@ -77,7 +77,7 @@ export function BookingWidget(props: Props) {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 font-sans text-lg font-semibold">
             <CalendarDays className="h-5 w-5 text-clay-500" aria-hidden />
-            {checkIn && !checkOut ? t.booking.selectCheckOut : t.booking.selectDates}
+            {checkIn && checkOut ? t.booking.datesSelected : checkIn ? t.booking.selectCheckOut : t.booking.selectDates}
           </h2>
           {(checkIn || checkOut) && (
             <button type="button" className="text-sm font-medium text-sea-700 underline" onClick={() => { setCheckIn(null); setCheckOut(null); }}>

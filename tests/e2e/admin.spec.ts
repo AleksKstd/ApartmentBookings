@@ -1,9 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { adminLogin, isoDayFromToday } from "./helpers";
 
-test("admin pages require login", async ({ page }) => {
-  await page.goto("/admin/bookings");
-  await expect(page).toHaveURL(/\/admin\/login$/);
+test("admin pages require login, including dotted paths", async ({ page }) => {
+  for (const path of ["/admin", "/admin/bookings", "/admin/bookings/x.json"]) {
+    await page.goto(path);
+    await expect(page, path).toHaveURL(/\/admin\/login$/);
+  }
 });
 
 test("wrong credentials are rejected", async ({ page }) => {

@@ -58,6 +58,10 @@ export interface Repository {
   deleteMedia(id: string): Promise<MediaItem | null>;
   uploadMediaFile(input: UploadInput): Promise<{ url: string; storagePath: string }>;
   deleteMediaFile(storagePath: string): Promise<void>;
+  /** Direct browser uploads (Supabase only): a signed URL the browser PUTs the file to. */
+  createUploadTarget?(extension: string): Promise<{ signedUrl: string; storagePath: string }>;
+  readUploadedFile?(storagePath: string): Promise<Uint8Array | null>;
+  publicMediaUrl?(storagePath: string): string;
 
   listBookings(filter?: BookingFilter): Promise<Booking[]>;
   getBooking(id: string): Promise<Booking | null>;

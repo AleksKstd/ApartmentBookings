@@ -42,7 +42,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           </div>
           <div>
             <h3 className="sr-only">{t.home.factsTitle}</h3>
-            <Facts property={property} pricing={pricing} t={t} />
+            <Facts property={property} pricing={pricing} t={t} compact />
           </div>
         </div>
       </section>
