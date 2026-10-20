@@ -32,34 +32,38 @@ export function BookingWidget(props: Props) {
   const [checkIn, setCheckIn] = useState<string | null>(props.initial?.checkIn ?? null);
   const [checkOut, setCheckOut] = useState<string | null>(props.initial?.checkOut ?? null);
   const [guests, setGuests] = useState(Math.min(props.initial?.guests ?? 2, maxGuests));
-  const [quote, setQuote] = useState<QuoteState>({ status: "idle" });
   const [state, formAction, pending] = useActionState<BookingFormState, FormData>(submitBooking, {});
 
   const minNightsFor = (day: string) =>
     props.seasonMinNights.findLast((s) => day >= s.startDate && day <= s.endDate)?.minNights ?? props.minNights;
 
+  // Quotes are fetched per (dates, guests) key; a stale result simply shows as "loading".
+  const quoteKey = checkIn && checkOut ? `${checkIn}|${checkOut}|${guests}` : null;
+  const [result, setResult] = useState<{ key: string; state: QuoteState } | null>(null);
+  const quote: QuoteState = !quoteKey ? { status: "idle" } : result?.key === quoteKey ? result.state : { status: "loading" };
+
   useEffect(() => {
-    if (!checkIn || !checkOut) {
-      setQuote({ status: "idle" });
-      return;
-    }
+    if (!quoteKey) return;
+    const [qIn, qOut] = quoteKey.split("|");
     const controller = new AbortController();
-    setQuote({ status: "loading" });
     fetch("/api/quote", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ checkIn, checkOut, guests, locale }),
+      body: JSON.stringify({ checkIn: qIn, checkOut: qOut, guests, locale }),
       signal: controller.signal,
     })
       .then(async (res) => {
         const data = await res.json();
-        setQuote(res.ok ? { status: "ok", quote: data.quote } : { status: "error", message: data.message ?? t.booking.errors.server });
+        setResult({
+          key: quoteKey,
+          state: res.ok ? { status: "ok", quote: data.quote } : { status: "error", message: data.message ?? t.booking.errors.server },
+        });
       })
       .catch((e) => {
-        if (e.name !== "AbortError") setQuote({ status: "error", message: t.booking.errors.server });
+        if (e.name !== "AbortError") setResult({ key: quoteKey, state: { status: "error", message: t.booking.errors.server } });
       });
     return () => controller.abort();
-  }, [checkIn, checkOut, guests, locale, t.booking.errors.server]);
+  }, [quoteKey, guests, locale, t.booking.errors.server]);
 
   const dateFmt = new Intl.DateTimeFormat(locale === "bg" ? "bg-BG" : "en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
   const showDate = (d: string) => dateFmt.format(new Date(`${d}T00:00:00Z`));

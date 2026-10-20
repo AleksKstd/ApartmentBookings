@@ -26,7 +26,7 @@ interface DemoDb {
 }
 
 export function demoDataDir(): string {
-  return path.resolve(process.env.DEMO_DATA_DIR || ".demo-data");
+  return path.resolve(/*turbopackIgnore: true*/ process.env.DEMO_DATA_DIR || ".demo-data");
 }
 
 function seed(): DemoDb {

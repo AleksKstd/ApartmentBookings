@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { fmt, type Dictionary } from "@/i18n";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,13 @@ interface Slide {
 }
 
 const INTERVAL_MS = 6000;
+const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
+
+function subscribeReducedMotion(onChange: () => void) {
+  const mq = window.matchMedia(REDUCED_MOTION);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
 
 export function HeroCarousel({
   slides,
@@ -30,16 +37,14 @@ export function HeroCarousel({
   t: Dictionary["carousel"];
 }) {
   const [index, setIndex] = useState(0);
-  const [playing, setPlaying] = useState(true);
+  const reducedMotion = useSyncExternalStore(subscribeReducedMotion, () => window.matchMedia(REDUCED_MOTION).matches, () => false);
+  const [playChoice, setPlayChoice] = useState<boolean | null>(null);
+  const playing = playChoice ?? !reducedMotion;
   const [hovered, setHovered] = useState(false);
   const touchX = useRef<number | null>(null);
   const count = slides.length;
 
   const go = useCallback((next: number) => setIndex(((next % count) + count) % count), [count]);
-
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) setPlaying(false);
-  }, []);
 
   useEffect(() => {
     if (!playing || hovered || count < 2) return;
@@ -119,7 +124,7 @@ export function HeroCarousel({
               ))}
             </div>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setPlaying((p) => !p)} className="carousel-btn" aria-label={playing ? t.pause : t.play}>
+              <button type="button" onClick={() => setPlayChoice(!playing)} className="carousel-btn" aria-label={playing ? t.pause : t.play}>
                 {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               </button>
               <button type="button" onClick={() => go(index - 1)} className="carousel-btn" aria-label={t.previous}>

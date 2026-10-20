@@ -12,7 +12,6 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
   const pathname = usePathname() ?? `/${locale}`;
   const [open, setOpen] = useState(false);
 
-  useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
@@ -93,6 +92,7 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
               <li key={l.href}>
                 <Link
                   href={l.href}
+                  onClick={() => setOpen(false)}
                   aria-current={isActive(l.href) ? "page" : undefined}
                   className="block rounded-xl px-3 py-3 text-base font-medium text-sea-900 hover:bg-sea-50"
                 >
@@ -101,7 +101,7 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
               </li>
             ))}
             <li className="mt-2 px-3 pb-2">
-              <Link href={`/${locale}/booking`} className="btn-primary w-full">
+              <Link href={`/${locale}/booking`} onClick={() => setOpen(false)} className="btn-primary w-full">
                 {t.bookNow}
               </Link>
             </li>
