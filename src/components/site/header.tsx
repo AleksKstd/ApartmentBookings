@@ -57,7 +57,8 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link
+          {/* Plain <a>: a full load re-renders the root layout so <html lang> and metadata follow the language. */}
+          <a
             href={switchHref}
             onClick={rememberLocale}
             hrefLang={otherLocale}
@@ -68,7 +69,7 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
             <Globe className="h-4 w-4" aria-hidden />
             <span className="hidden sm:inline">{t.switchTo}</span>
             <span className="sm:hidden">{otherLocale.toUpperCase()}</span>
-          </Link>
+          </a>
           <Link href={`/${locale}/booking`} className="btn-primary hidden sm:inline-flex">
             {t.bookNow}
           </Link>
