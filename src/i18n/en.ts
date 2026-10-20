@@ -22,6 +22,7 @@ const en: Dictionary = {
     closeMenu: "Close menu",
     language: "Language",
     switchTo: "Български",
+    skipToContent: "Skip to content",
   },
   common: {
     guests: "Guests",

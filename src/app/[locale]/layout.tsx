@@ -27,7 +27,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   return (
     <>
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2">
-        {locale === "bg" ? "Към съдържанието" : "Skip to content"}
+        {t.nav.skipToContent}
       </a>
       {demo && (
         <div className="bg-clay-600 px-4 py-1.5 text-center text-xs font-medium text-white" role="note">

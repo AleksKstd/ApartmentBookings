@@ -21,6 +21,7 @@ const bg = {
     closeMenu: "Затвори менюто",
     language: "Език",
     switchTo: "English",
+    skipToContent: "Към съдържанието",
   },
   common: {
     guests: "Гости",
