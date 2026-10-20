@@ -64,15 +64,22 @@ export class DemoRepository implements Repository {
       return JSON.parse(await fs.readFile(this.file, "utf8")) as DemoDb;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      // First run: create the seeded file exclusively so concurrent requests don't clobber it.
       const db = seed();
-      await this.save(db);
-      return db;
+      await fs.mkdir(path.dirname(this.file), { recursive: true });
+      try {
+        await fs.writeFile(this.file, JSON.stringify(db, null, 2), { flag: "wx" });
+        return db;
+      } catch (writeError) {
+        if ((writeError as NodeJS.ErrnoException).code !== "EEXIST") throw writeError;
+        return JSON.parse(await fs.readFile(this.file, "utf8")) as DemoDb;
+      }
     }
   }
 
   private async save(db: DemoDb) {
     await fs.mkdir(path.dirname(this.file), { recursive: true });
-    const tmp = `${this.file}.${process.pid}.tmp`;
+    const tmp = `${this.file}.${randomUUID()}.tmp`;
     await fs.writeFile(tmp, JSON.stringify(db, null, 2));
     await fs.rename(tmp, this.file);
   }

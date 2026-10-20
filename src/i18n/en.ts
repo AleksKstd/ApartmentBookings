@@ -58,6 +58,8 @@ const en: Dictionary = {
     slide: "Photo {n} of {total}",
     pause: "Pause",
     play: "Play",
+    previous: "Previous photo",
+    next: "Next photo",
   },
   home: {
     factsTitle: "At a glance",

@@ -238,3 +238,23 @@ export function problemMessage(locale: "bg" | "en", code: string, detail?: numbe
   const errors = getDictionary(locale).booking.errors as Record<string, string>;
   return fmt(errors[code] ?? errors.server, { n: detail ?? "" });
 }
+
+/**
+ * Guest abandoned Stripe Checkout: expire the session and release the dates immediately instead of
+ * waiting for the hold to lapse. If the session was in fact paid, the payment is applied instead.
+ */
+export async function releaseAbandonedCheckout(booking: Booking): Promise<Booking> {
+  if (booking.status !== "awaiting_payment") return booking;
+  const repo = getRepository();
+  if (booking.stripeSessionId && isStripeConfigured()) {
+    try {
+      const session = await getStripe().checkout.sessions.retrieve(booking.stripeSessionId);
+      if (session.status === "complete") return (await applyCheckoutSession(session)) ?? booking;
+      if (session.status === "open") await getStripe().checkout.sessions.expire(session.id);
+    } catch (error) {
+      console.error("[booking] could not expire checkout session", error);
+      return booking; // keep the hold; it lapses on its own
+    }
+  }
+  return repo.updateBooking(booking.id, { status: "cancelled", cancelledAt: new Date().toISOString(), adminNote: "Guest abandoned checkout" });
+}

@@ -17,13 +17,14 @@ const MEDIA_BUCKET = "media";
 /* eslint-disable @typescript-eslint/no-explicit-any -- rows are mapped explicitly below */
 type Row = Record<string, any>;
 
-function check<T>(result: { data: T; error: { message: string; code?: string } | null }): T {
+/** Unwraps a PostgREST response, throwing on error (`.single()` data is non-null when there is no error). */
+function check<T>(result: { data: T; error: { message: string; code?: string } | null }): NonNullable<T> {
   if (result.error) {
     const err = new Error(result.error.message) as Error & { code?: string };
     err.code = result.error.code;
     throw err;
   }
-  return result.data;
+  return result.data as NonNullable<T>;
 }
 
 const toBooking = (r: Row): Booking => ({
@@ -263,7 +264,8 @@ export class SupabaseRepository implements Repository {
   }
 
   private async bookingBy(column: string, value: string) {
-    const row = check(await this.db.from("bookings").select("*").eq(column, value).maybeSingle()) as Row | null;
+    const { data: row, error } = await this.db.from("bookings").select("*").eq(column, value).maybeSingle();
+    if (error) throw new Error(error.message);
     return row ? toBooking(row) : null;
   }
 

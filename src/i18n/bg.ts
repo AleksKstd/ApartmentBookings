@@ -57,6 +57,8 @@ const bg = {
     slide: "Снимка {n} от {total}",
     pause: "Пауза",
     play: "Пусни",
+    previous: "Предишна снимка",
+    next: "Следваща снимка",
   },
   home: {
     factsTitle: "Накратко",
