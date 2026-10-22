@@ -4,7 +4,7 @@
 > Statuses: `Not started` · `In progress` · `Completed` · `Blocked`.
 > "Completed" means implemented **and** verified (tests / build / manual run), not just UI present.
 
-_Last updated: 2026-10-20 — end of session 1_
+_Last updated: 2026-10-22 — branch pushed to GitHub_
 
 ---
 
@@ -58,7 +58,7 @@ reservations, prices, media and homepage content.
     a signed URL, and the server then verifies the bytes. This avoids Vercel's 4.5 MB body limit.
 
 **Current implementation phase:** Phase 1 complete. All features are implemented and verified locally.
-Remaining work: push to GitHub (blocked, see §4), and live verification with real Supabase, Stripe and Resend
+Remaining work: live verification with real Supabase, Stripe and Resend
 credentials.
 
 ---
@@ -183,9 +183,9 @@ API routes:
 ## 4. Remaining work
 
 ### Blocked
-- **Push to GitHub:** `git push` to `AleksKstd/ApartmentBookings` returned **403** because Claude has no GitHub access to this repository.
-  - Fix: reconnect GitHub at https://claude.ai/connect-github and install the Claude GitHub App on the repository.
-  - All work is committed locally on `claude/stoic-volta-s2maxz`. Push once access is granted.
+- None. The earlier GitHub 403 was resolved on 2026-10-22, and the branch `claude/stoic-volta-s2maxz` is pushed.
+  The repository had no other branches, so before connecting Vercel, set the production branch
+  (create `main` from this branch, or select this branch in Vercel).
 
 ### Requires external credentials (code complete, live verification pending)
 - **Supabase:**
