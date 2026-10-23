@@ -4,7 +4,7 @@
 > Statuses: `Not started` · `In progress` · `Completed` · `Blocked`.
 > "Completed" means implemented **and** verified (tests / build / manual run), not just UI present.
 
-_Last updated: 2026-10-22 — branch pushed to GitHub_
+_Last updated: 2026-10-23 — Supabase project being created through Vercel; repo prepared for the Supabase GitHub integration_
 
 ---
 
@@ -86,7 +86,7 @@ credentials.
 | 17 | Reservation management | Completed | List with filter and search; detail view; confirm, cancel (with optional Stripe refund and guest email), mark paid, notes, resend email, manual booking. e2e covers confirm. |
 | 18 | Media management | Completed (demo); Supabase path untested live | Upload with magic-byte checks, alt text in BG and EN, carousel and gallery toggles, reorder, delete. e2e covers demo uploads. The signed-URL direct upload needs a live Supabase project to verify. |
 | 19 | Homepage content editor | Completed | Bilingual hero, intro, highlights (add/remove), location and CTA, plus a property info editor. e2e: an edit appears on the site. |
-| 20 | Database migrations | Completed | `supabase/migrations/0001_initial_schema.sql`, idempotent. **Verified on PostgreSQL 16:** the exclusion constraint, RLS denying `anon`, and `reorder_media`. The seed was run twice. See `supabase/tests/`. |
+| 20 | Database migrations | Completed | `supabase/migrations/20261020000000_initial_schema.sql` (idempotent) and `20261020000100_starter_content.sql`, laid out for the Supabase CLI and GitHub integration (`supabase/config.toml`). **Verified on PostgreSQL 16:** the exclusion constraint, RLS denying `anon`, and `reorder_media`. The seed was run twice. See `supabase/tests/`. |
 | 21 | Supabase integration code | Completed in code; **not run against a live Supabase** | `SupabaseRepository` implements the same interface as the demo store, which is fully tested. The SQL is verified; PostgREST and Storage calls are untested without credentials. |
 | 22 | Stripe integration code | Completed in code; unit-tested with Stripe mocked; **not run against Stripe test mode** | Checkout session, webhook with signature check, reconcile, abandon/retry, refunds. Unit tests cover paid, expired, late payment and idempotency. |
 | 23 | Email notification code | Completed (logging path verified); **Resend sending needs an API key** | HTML and text templates with escaping, in the guest's language. The owner is notified. Email log in admin. e2e checks the logged emails. |
@@ -129,7 +129,7 @@ API routes:
   - `src/components/booking/*` (calendar, widget, auto-refresh)
   - `src/components/admin/*` (form kit, sidebar, media uploader, UI helpers)
 - **Admin actions:** `src/app/admin/actions.ts`
-- **Database:** `supabase/migrations/0001_initial_schema.sql`, `supabase/seed.sql`, `supabase/tests/*`
+- **Database:** `supabase/config.toml`, `supabase/migrations/*.sql`, `supabase/tests/*`
 
 ### Tests completed (final run, session 1)
 - `npm run lint`: clean
@@ -186,6 +186,18 @@ API routes:
 - None. The earlier GitHub 403 was resolved on 2026-10-22, and the branch `claude/stoic-volta-s2maxz` is pushed.
   The repository had no other branches, so before connecting Vercel, set the production branch
   (create `main` from this branch, or select this branch in Vercel).
+
+### In progress (session 2)
+- The Supabase project is being created through the Vercel Marketplace (Frankfurt), with the Supabase
+  GitHub integration deploying migrations from branch `claude/stoic-volta-s2maxz`.
+- Repo changes for this:
+  - `supabase/config.toml` added
+  - migrations renamed with timestamps; starter content moved from `seed.sql` into a migration (production deploys do not run seeds)
+  - the unneeded `pgcrypto`/`btree_gist` extension statements removed (re-verified on PG16)
+  - `SUPABASE_SECRET_KEY` accepted as an alternative to `SUPABASE_SERVICE_ROLE_KEY`
+  - `vercel.json` region set to `fra1`
+- Next: confirm in Supabase that both migrations applied (Table Editor shows `site_settings` with 3 rows), and
+  confirm the Vercel env var names.
 
 ### Requires external credentials (code complete, live verification pending)
 - **Supabase:**

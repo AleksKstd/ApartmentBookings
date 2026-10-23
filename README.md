@@ -55,8 +55,8 @@ src/
   lib/data/                repository interface + Supabase and demo implementations
   lib/ical.ts              iCal parser/generator; lib/calendar-sync.ts imports feeds
   proxy.ts                 locale redirects + admin session check
-supabase/migrations        SQL schema (RLS, double-booking exclusion constraint)
-supabase/seed.sql          starting content (regenerate: node --experimental-strip-types scripts/generate-seed.mts > supabase/seed.sql)
+supabase/config.toml       Supabase CLI / GitHub integration config
+supabase/migrations        SQL schema (RLS, double-booking exclusion constraint) + starter content
 supabase/tests             SQL checks for the constraints
 tests/unit, tests/e2e
 ```

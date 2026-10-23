@@ -12,3 +12,5 @@ next-env.d.ts
 .DS_Store
 .e2e-data
 !.env.example
+supabase/.temp
+supabase/.branches

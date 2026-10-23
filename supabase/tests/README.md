@@ -5,8 +5,7 @@ Verifies the migration on a plain local PostgreSQL 16 (no Supabase needed):
 ```bash
 createdb ab_test
 psql -d ab_test -f supabase/tests/00_supabase_stub.sql      # stand-ins for Supabase roles/storage
-psql -d ab_test -f supabase/migrations/0001_initial_schema.sql
-psql -d ab_test -f supabase/seed.sql
+for f in supabase/migrations/*.sql; do psql -d ab_test -f "$f"; done
 psql -d ab_test -f supabase/tests/10_constraints.sql
 ```
 

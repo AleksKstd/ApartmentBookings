@@ -1,7 +1,7 @@
 import type { SiteSettings } from "./repository";
 import type { MediaItem } from "@/lib/types";
 
-// Starting content used by demo mode and by `supabase/seed.sql`. Everything here is editable in
+// Starting content used by demo mode and by the starter-content migration. Everything here is editable in
 // the admin area.
 export const DEFAULT_SETTINGS: SiteSettings = {
   property: {

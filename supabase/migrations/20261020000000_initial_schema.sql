@@ -2,8 +2,8 @@
 -- All application access goes through the server using the service-role key; RLS is enabled on
 -- every table with NO public policies, so the anon key cannot read guest data or write anything.
 
-create extension if not exists pgcrypto;
-create extension if not exists btree_gist;
+-- gen_random_uuid() is built into PostgreSQL 13+, and the daterange exclusion constraint below
+-- uses GiST's native range operators, so no extensions are required.
 
 -- ---------------------------------------------------------------------------
 -- Site settings: one JSON document per key ('property', 'homepage', 'pricing')

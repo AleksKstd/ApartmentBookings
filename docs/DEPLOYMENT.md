@@ -10,18 +10,30 @@ confirm in the admin area. Without Resend, emails are only recorded in **Admin �
 
 ## 1. Supabase
 
-1. Create a project at https://supabase.com and choose an EU region, e.g. Frankfurt.
-2. Open **SQL Editor** and run, in order:
-   1. `supabase/migrations/0001_initial_schema.sql`, which creates the tables, the double-booking
-      constraint, RLS (deny-by-default) and the `media` storage bucket.
-   2. `supabase/seed.sql`, which loads the starting texts, prices and placeholder photos. All of it can be
-      edited later in the admin area.
-3. Under **Project Settings → API**, copy:
-   - the Project URL into `NEXT_PUBLIC_SUPABASE_URL`
-   - the `service_role` key into `SUPABASE_SERVICE_ROLE_KEY` (**secret, server-only**)
+### Option A: Vercel Marketplace and GitHub integration (recommended)
 
-The application never uses the anon key. All database access runs on the server, and the RLS policies
-deliberately grant nothing to `anon` or `authenticated`.
+1. In Vercel, add the Supabase integration. Choose an EU region (Frankfurt, `fra1`) and keep the public
+   environment variable prefix as `NEXT_PUBLIC_`. This creates the project and adds its URL and keys to the
+   Vercel project.
+2. In Supabase, under **Project Settings → Integrations → GitHub**, connect `AleksKstd/ApartmentBookings`:
+   - Working directory: `.` (the folder that contains `supabase/`)
+   - Deploy to production: **on**, with the production branch set to the branch Vercel deploys
+3. Migrations in `supabase/migrations/` are then applied automatically when commits reach that branch:
+   - `20261020000000_initial_schema.sql`: tables, the double-booking constraint, RLS and the `media` bucket
+   - `20261020000100_starter_content.sql`: starting texts, prices and placeholder photos. It never
+     overwrites existing rows, and everything can be edited later in the admin area.
+4. Check that the Vercel project has `NEXT_PUBLIC_SUPABASE_URL` and a server key, either
+   `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SECRET_KEY` (the app accepts both).
+
+### Option B: Manual setup
+
+1. Create a project at https://supabase.com in an EU region.
+2. In the **SQL Editor**, run the files in `supabase/migrations/` in name order.
+3. Copy the Project URL into `NEXT_PUBLIC_SUPABASE_URL`, and the `service_role` or secret key into
+   `SUPABASE_SERVICE_ROLE_KEY`. This key is **secret and server-only**.
+
+The application never uses the anon or publishable key. All database access runs on the server, and the RLS
+policies deliberately grant nothing to `anon` or `authenticated`.
 
 ## 2. Admin credentials
 
