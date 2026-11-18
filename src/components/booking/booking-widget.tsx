@@ -197,7 +197,7 @@ export function BookingWidget(props: Props) {
           aria-labelledby="details-title"
           noValidate
         >
-          <h2 id="details-title" className="font-sans text-lg font-semibold">{t.booking.yourDetails}</h2>
+          <h2 id="details-title" className="!mt-0 font-sans text-lg font-semibold">{t.booking.yourDetails}</h2>
           <input type="hidden" name="checkIn" value={checkIn ?? ""} />
           <input type="hidden" name="checkOut" value={checkOut ?? ""} />
           <input type="hidden" name="guests" value={guests} />

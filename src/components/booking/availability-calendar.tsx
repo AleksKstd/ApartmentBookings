@@ -177,7 +177,7 @@ export function AvailabilityCalendar({
           const headingId = `${helpId}-m${mi}`;
           return (
             <div key={m} className={cn(mi > 0 && "hidden md:block")}>
-              <h3 id={headingId} className="mb-3 text-center font-sans text-base font-semibold capitalize text-sea-900">
+              <h3 id={headingId} className="mb-3 text-center font-sans text-base font-semibold text-sea-900 first-letter:uppercase">
                 {monthFmt.format(parseDay(m))}
               </h3>
               <div role="grid" aria-labelledby={headingId} aria-describedby={helpId}>
