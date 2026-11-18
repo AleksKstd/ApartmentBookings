@@ -39,14 +39,37 @@ export default async function BookingsPage({ searchParams }: PageProps<"/admin/b
             {f.label}
           </Link>
         ))}
-        <form className="ml-auto flex gap-2" role="search">
+        <form className="flex w-full gap-2 sm:ml-auto sm:w-auto" role="search">
           <input type="hidden" name="status" value={filter} />
-          <input name="q" defaultValue={search} placeholder="Търси по име, имейл, номер…" className="input w-64" aria-label="Търсене" />
+          <input name="q" defaultValue={search} placeholder="Търси по име, имейл, номер…" className="input w-full sm:w-64" aria-label="Търсене" />
           <button className="btn-outline" type="submit">Търси</button>
         </form>
       </div>
 
-      <div className="card overflow-x-auto">
+      {/* Phones: one card per booking instead of a wide table. */}
+      <ul className="space-y-3 md:hidden" aria-label="Резервации">
+        {bookings.length === 0 && <li className="card p-6 text-center text-ink-muted">Няма резервации.</li>}
+        {bookings.map((b) => (
+          <li key={b.id}>
+            <Link href={`/admin/bookings/${b.id}`} className="card block p-4 hover:ring-sea-200">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{b.guestName}</p>
+                  <p className="font-mono text-xs text-ink-muted">{b.reference}</p>
+                </div>
+                <StatusBadge status={b.status} />
+              </div>
+              <p className="mt-3 text-sm">{showDay(b.checkIn)} → {showDay(b.checkOut)} · {b.nights} нощ. · {b.guests} гости</p>
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <span className="font-semibold">{money(b.totalAmount, b.currency)}</span>
+                <PaymentBadge status={b.paymentStatus} />
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      <div className="card hidden overflow-x-auto md:block">
         <table className="w-full min-w-[760px] text-left text-sm">
           <thead className="border-b border-sand-200 text-xs uppercase tracking-wide text-ink-muted">
             <tr>

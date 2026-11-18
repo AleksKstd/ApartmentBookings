@@ -2,7 +2,7 @@
 
 import { useActionState, useTransition, useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import type { ActionResult } from "@/app/admin/actions";
+import type { ActionResult } from "@/app/admin/actions/shared";
 import { cn } from "@/lib/utils";
 
 type FormAction = (prev: ActionResult | null, formData: FormData) => Promise<ActionResult>;

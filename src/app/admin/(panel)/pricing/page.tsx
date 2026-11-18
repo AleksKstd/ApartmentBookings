@@ -1,4 +1,4 @@
-import { deleteSeasonalRate, savePricing, saveSeasonalRate } from "@/app/admin/actions";
+import { deleteSeasonalRate, savePricing, saveSeasonalRate } from "@/app/admin/actions/pricing";
 import { ActionButton, AdminForm, Field } from "@/components/admin/form-kit";
 import { PageHeader, Panel, euros, money, showDay } from "@/components/admin/ui";
 import { getRepository } from "@/lib/data";

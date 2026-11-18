@@ -343,3 +343,15 @@ export async function releaseAbandonedCheckout(booking: Booking): Promise<Bookin
     })) ?? (await repo.getBooking(booking.id)) ?? booking
   );
 }
+
+/** URL of the guest's still-open Stripe Checkout page, if any (to finish an interrupted payment). */
+export async function openCheckoutUrl(booking: Booking): Promise<string | null> {
+  if (booking.status !== "awaiting_payment" || !booking.stripeSessionId || !isStripeConfigured()) return null;
+  try {
+    const session = await getStripe().checkout.sessions.retrieve(booking.stripeSessionId);
+    return session.status === "open" ? session.url : null;
+  } catch (error) {
+    console.error("[booking] could not load checkout session", error);
+    return null;
+  }
+}

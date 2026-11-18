@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { BookingWidget } from "@/components/booking/booking-widget";
 import { getDictionary, isLocale } from "@/i18n";
@@ -10,7 +11,7 @@ import { isStripeConfigured } from "@/lib/stripe";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/booking">): Promise<Metadata> {
   const { locale } = await params;
-  return isLocale(locale) ? { title: getDictionary(locale).meta.booking } : {};
+  return isLocale(locale) ? pageMetadata(locale, "/booking", getDictionary(locale).meta.booking) : {};
 }
 
 export default async function BookingPage({ params, searchParams }: PageProps<"/[locale]/booking">) {

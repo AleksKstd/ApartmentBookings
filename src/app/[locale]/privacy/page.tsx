@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { getDictionary, isLocale } from "@/i18n";
 import { getSiteData } from "@/lib/site";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/privacy">): Promise<Metadata> {
   const { locale } = await params;
-  return isLocale(locale) ? { title: getDictionary(locale).meta.privacy } : {};
+  return isLocale(locale) ? pageMetadata(locale, "/privacy", getDictionary(locale).meta.privacy) : {};
 }
 
 export default async function PrivacyPage({ params }: PageProps<"/[locale]/privacy">) {

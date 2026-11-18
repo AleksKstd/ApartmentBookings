@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { Gallery } from "@/components/site/gallery";
 import { getDictionary, isLocale, pick } from "@/i18n";
@@ -6,7 +7,7 @@ import { getSiteData } from "@/lib/site";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/gallery">): Promise<Metadata> {
   const { locale } = await params;
-  return isLocale(locale) ? { title: getDictionary(locale).meta.gallery } : {};
+  return isLocale(locale) ? pageMetadata(locale, "/gallery", getDictionary(locale).meta.gallery) : {};
 }
 
 export default async function GalleryPage({ params }: PageProps<"/[locale]/gallery">) {

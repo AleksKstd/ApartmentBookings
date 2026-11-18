@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
@@ -81,11 +82,12 @@ export function HeroCarousel({
             i === index ? "opacity-100" : "opacity-0",
           )}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element -- admin-uploaded images from storage */}
-          <img
+          <Image
             src={slide.url}
             alt={slide.alt}
-            className={cn("h-full w-full object-cover transition-transform duration-[7000ms] ease-out", i === index && "scale-105")}
+            fill
+            sizes="100vw"
+            className={cn("object-cover transition-transform duration-[7000ms] ease-out", i === index && "scale-105")}
             loading={i === 0 ? "eager" : "lazy"}
             fetchPriority={i === 0 ? "high" : "auto"}
           />

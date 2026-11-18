@@ -1,4 +1,4 @@
-import { saveHomepage, saveProperty } from "@/app/admin/actions";
+import { saveHomepage, saveProperty } from "@/app/admin/actions/content";
 import { AdminForm, Field, LocalizedField } from "@/components/admin/form-kit";
 import { PageHeader, Panel } from "@/components/admin/ui";
 import bg from "@/i18n/bg";

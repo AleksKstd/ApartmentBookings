@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { cancelBooking, confirmBooking, markBookingPaid, resendGuestEmail, saveAdminNote } from "@/app/admin/actions";
+import { cancelBooking, confirmBooking, markBookingPaid, resendGuestEmail, saveAdminNote } from "@/app/admin/actions/bookings";
 import { ActionButton, AdminForm } from "@/components/admin/form-kit";
 import { PageHeader, Panel, PaymentBadge, StatusBadge, money, showDateTime, showDay } from "@/components/admin/ui";
 import { getRepository } from "@/lib/data";

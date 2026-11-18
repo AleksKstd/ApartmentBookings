@@ -8,8 +8,8 @@ const config: Config = {
       colors: {
         sea: { 50: "#eef6f7", 100: "#d5e8ec", 200: "#a9d0d8", 500: "#2f7184", 600: "#235f71", 700: "#1d4e5f", 800: "#173e4b", 900: "#102c35" },
         sand: { 50: "#fbf9f5", 100: "#f6f3ee", 200: "#ece5d8", 300: "#dccfb8" },
-        clay: { 400: "#d9896a", 500: "#c9714b", 600: "#b05d39", 700: "#8f4a2c" },
-        ink: { DEFAULT: "#1f2a2e", muted: "#5b6b70", soft: "#8a979b" },
+        clay: { 400: "#d9896a", 500: "#c9714b", 600: "#a14f2c", 700: "#843f22" },
+        ink: { DEFAULT: "#1f2a2e", muted: "#5b6b70", soft: "#626f75" },
       },
       fontFamily: {
         sans: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],

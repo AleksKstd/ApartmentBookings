@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import { createUploadTarget, finalizeUpload, uploadMedia, type ActionResult } from "@/app/admin/actions";
+import { createUploadTarget, finalizeUpload, uploadMedia } from "@/app/admin/actions/media";
+import type { ActionResult } from "@/app/admin/actions/shared";
 import { AdminForm, ResultMessage } from "./form-kit";
 
 const ACCEPT = "image/jpeg,image/png,image/webp,image/avif";

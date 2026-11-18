@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Clock, MapPin } from "lucide-react";
@@ -13,7 +15,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/apartmen
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const { property } = await getSiteData();
-  return { title: getDictionary(locale).meta.apartment, description: pick(property.description, locale).slice(0, 160) };
+  return pageMetadata(locale, "/apartment", getDictionary(locale).meta.apartment, pick(property.description, locale).slice(0, 160));
 }
 
 export default async function ApartmentPage({ params }: PageProps<"/[locale]/apartment">) {
@@ -42,8 +44,9 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/apa
             </Link>
           </div>
           {cover && (
-            // eslint-disable-next-line @next/next/no-img-element -- admin-uploaded images from storage
-            <img src={cover.url} alt={pick(cover.alt, locale)} className="aspect-[4/3] w-full rounded-3xl object-cover shadow-card" />
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl shadow-card">
+              <Image src={cover.url} alt={pick(cover.alt, locale)} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" preload />
+            </div>
           )}
         </div>
       </section>
@@ -109,6 +112,7 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/apa
             {property.mapUrl && (
               <a href={property.mapUrl} target="_blank" rel="noopener noreferrer" className="btn-outline mt-4">
                 {t.common.openMap}
+                <span className="sr-only"> {t.common.opensNewTab}</span>
               </a>
             )}
           </div>

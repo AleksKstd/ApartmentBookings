@@ -26,7 +26,7 @@
     @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
   }
   .btn-primary {
-    @apply btn bg-clay-500 text-white hover:bg-clay-600;
+    @apply btn bg-clay-600 text-white hover:bg-clay-700;
   }
   .btn-secondary {
     @apply btn bg-sea-700 text-white hover:bg-sea-800;

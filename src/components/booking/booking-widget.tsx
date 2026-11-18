@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useMemo, useState } from "react";
-import { CalendarDays, LoaderCircle, Users } from "lucide-react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { CalendarDays, ExternalLink, LoaderCircle, Users } from "lucide-react";
 import { submitBooking, type BookingFormState } from "@/app/[locale]/booking/actions";
 import { fmt, type Dictionary } from "@/i18n";
 import { formatMoney } from "@/lib/pricing";
@@ -71,8 +71,25 @@ export function BookingWidget(props: Props) {
   const lineLabel = (label: string, quantity: number) => fmt((t.booking.lines as Record<string, string>)[label] ?? label, { n: quantity });
   const ready = quote.status === "ok";
 
+  // After a failed submit, move focus to the first invalid field (or the error message) so keyboard
+  // and screen-reader users land on what needs fixing.
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form || (!state.error && !state.fieldErrors)) return;
+    const target = form.querySelector<HTMLElement>('[aria-invalid="true"]') ?? form.querySelector<HTMLElement>('[role="alert"]');
+    if (target) {
+      if (target.getAttribute("role") === "alert") target.tabIndex = -1;
+      target.focus();
+    }
+  }, [state]);
+
+  const focusFirstField = () => {
+    window.setTimeout(() => formRef.current?.querySelector<HTMLInputElement>("#guestName")?.focus({ preventScroll: true }), 350);
+  };
+
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.35fr_1fr] lg:items-start">
+    <div className={cn("grid gap-8 lg:grid-cols-[1.35fr_1fr] lg:items-start", ready && "pb-20 lg:pb-0")}>
       <div className="card p-5 sm:p-7">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 font-sans text-lg font-semibold">
@@ -172,34 +189,54 @@ export function BookingWidget(props: Props) {
           </div>
         </section>
 
-        <form action={formAction} className={cn("card space-y-4 p-5 sm:p-7", !ready && "opacity-60")} aria-labelledby="details-title" noValidate>
+        <form
+          ref={formRef}
+          id="booking-details"
+          action={formAction}
+          className="card scroll-mt-24 space-y-4 p-5 sm:p-7"
+          aria-labelledby="details-title"
+          noValidate
+        >
           <h2 id="details-title" className="font-sans text-lg font-semibold">{t.booking.yourDetails}</h2>
           <input type="hidden" name="checkIn" value={checkIn ?? ""} />
           <input type="hidden" name="checkOut" value={checkOut ?? ""} />
           <input type="hidden" name="guests" value={guests} />
           <input type="hidden" name="locale" value={locale} />
+          {/* Honeypot for bots: hidden from people and assistive technology alike. */}
           <div className="hidden" aria-hidden>
-            <label>Website<input type="text" name="website" tabIndex={-1} autoComplete="off" /></label>
+            <input type="text" name="website" tabIndex={-1} autoComplete="off" />
           </div>
 
           <Field id="guestName" label={t.booking.fullName} error={state.fieldErrors?.guestName}>
-            <input id="guestName" name="guestName" className="input" autoComplete="name" defaultValue={state.values?.guestName} required minLength={2} maxLength={120} disabled={!ready} />
+            {(a11y) => <input {...a11y} name="guestName" className="input" autoComplete="name" defaultValue={state.values?.guestName} required minLength={2} maxLength={120} />}
           </Field>
           <Field id="guestEmail" label={t.booking.email} error={state.fieldErrors?.guestEmail}>
-            <input id="guestEmail" name="guestEmail" type="email" className="input" autoComplete="email" defaultValue={state.values?.guestEmail} required maxLength={254} disabled={!ready} />
+            {(a11y) => <input {...a11y} name="guestEmail" type="email" inputMode="email" className="input" autoComplete="email" defaultValue={state.values?.guestEmail} required maxLength={254} />}
           </Field>
           <Field id="guestPhone" label={t.booking.phone} error={state.fieldErrors?.guestPhone}>
-            <input id="guestPhone" name="guestPhone" type="tel" className="input" autoComplete="tel" defaultValue={state.values?.guestPhone} required maxLength={40} disabled={!ready} />
+            {(a11y) => <input {...a11y} name="guestPhone" type="tel" className="input" autoComplete="tel" defaultValue={state.values?.guestPhone} required maxLength={40} />}
           </Field>
           <Field id="guestNote" label={t.booking.note}>
-            <textarea id="guestNote" name="guestNote" rows={3} className="input" maxLength={2000} placeholder={t.booking.notePlaceholder} defaultValue={state.values?.guestNote} disabled={!ready} />
+            {(a11y) => <textarea {...a11y} name="guestNote" rows={3} className="input" maxLength={2000} placeholder={t.booking.notePlaceholder} defaultValue={state.values?.guestNote} />}
           </Field>
           <div>
             <label className="flex items-start gap-3 text-sm">
-              <input type="checkbox" name="acceptTerms" className="mt-0.5 h-4 w-4 rounded border-sand-300 accent-sea-700" required disabled={!ready} aria-describedby={state.fieldErrors?.acceptTerms ? "acceptTerms-error" : undefined} />
+              <input
+                id="acceptTerms"
+                type="checkbox"
+                name="acceptTerms"
+                className="mt-0.5 h-4 w-4 rounded border-sand-300 accent-sea-700"
+                required
+                aria-invalid={state.fieldErrors?.acceptTerms ? true : undefined}
+                aria-describedby={state.fieldErrors?.acceptTerms ? "acceptTerms-error" : undefined}
+              />
               <span>
                 {t.booking.acceptTerms.split("{privacy}")[0]}
-                <Link href={`/${locale}/privacy`} className="text-sea-700 underline" target="_blank">{t.booking.privacyLink}</Link>
+                <Link href={`/${locale}/privacy`} className="text-sea-700 underline" target="_blank" rel="noopener">
+                  {t.booking.privacyLink}
+                  <ExternalLink className="ml-0.5 inline h-3 w-3 align-baseline" aria-hidden />
+                  <span className="sr-only"> {t.common.opensNewTab}</span>
+                </Link>
                 {t.booking.acceptTerms.split("{privacy}")[1]}
               </span>
             </label>
@@ -208,24 +245,49 @@ export function BookingWidget(props: Props) {
 
           {state.error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700" role="alert">{state.error}</p>}
 
-          <button type="submit" className="btn-primary w-full py-3 text-base" disabled={!ready || pending}>
+          <button
+            type="submit"
+            className="btn-primary w-full py-3 text-base"
+            disabled={!ready || pending}
+            aria-describedby={!ready ? "submit-hint" : undefined}
+          >
             {pending && <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />}
             {pending ? t.booking.submitting : paymentsEnabled ? t.booking.submitPay : t.booking.submitRequest}
           </button>
+          {!ready && <p id="submit-hint" className="text-sm text-ink-muted">{t.booking.selectDatesFirst}</p>}
           <p className="text-xs text-ink-muted">
             {paymentsEnabled ? fmt(t.booking.payInfo, { n: props.holdMinutes }) : t.booking.requestInfo}
           </p>
         </form>
       </div>
+
+      {/* Mobile: keep the price and the next step within thumb reach, as on major booking sites. */}
+      {ready && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-sand-200 bg-white/95 px-4 py-3 shadow-[0_-8px_24px_-12px_rgba(16,44,53,.25)] backdrop-blur lg:hidden" data-testid="mobile-booking-bar">
+          <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-base font-semibold">{money(quote.quote.total)}</p>
+              <p className="truncate text-xs text-ink-muted">
+                {checkIn && checkOut && `${showDate(checkIn)} – ${showDate(checkOut)}`} · {quote.quote.nights} {quote.quote.nights === 1 ? t.common.night : t.common.nights}
+              </p>
+            </div>
+            <a href="#booking-details" className="btn-primary shrink-0" onClick={focusFirstField}>
+              {t.booking.continueToDetails}
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: React.ReactNode }) {
+type FieldA11y = { id: string; "aria-invalid"?: true; "aria-describedby"?: string };
+
+function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: (a11y: FieldA11y) => React.ReactNode }) {
   return (
     <div>
       <label className="label" htmlFor={id}>{label}</label>
-      {children}
+      {children({ id, "aria-invalid": error ? true : undefined, "aria-describedby": error ? `${id}-error` : undefined })}
       {error && <p id={`${id}-error`} className="mt-1 text-sm text-red-700">{error}</p>}
     </div>
   );

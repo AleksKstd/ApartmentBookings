@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { CalendarDays, FileText, Images, Inbox, LayoutDashboard, LogOut, Mail, Menu, RefreshCw, Tag, X } from "lucide-react";
-import { logout } from "@/app/admin/actions";
+import { logout } from "@/app/admin/actions/auth";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -39,12 +39,12 @@ export function AdminSidebar({ siteName, pendingCount, demo }: { siteName: strin
           <Icon className="h-4 w-4" aria-hidden />
           {label}
           {href === "/admin/bookings" && pendingCount > 0 && (
-            <span className="badge ml-auto bg-clay-500 text-white">{pendingCount}</span>
+            <span className="badge ml-auto bg-clay-600 text-white">{pendingCount}</span>
           )}
         </Link>
       ))}
       <div className="mt-auto space-y-1 border-t border-white/10 pt-4">
-        <Link href="/bg" target="_blank" className="block rounded-xl px-3 py-2 text-sm text-sea-200 hover:bg-white/10">
+        <Link href="/bg" target="_blank" rel="noopener" className="block rounded-xl px-3 py-2 text-sm text-sea-200 hover:bg-white/10">
           Към сайта ↗
         </Link>
         <form action={logout}>

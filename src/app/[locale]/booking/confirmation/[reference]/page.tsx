@@ -9,9 +9,30 @@ import { getRepository } from "@/lib/data";
 import { formatMoney } from "@/lib/pricing";
 import { getSiteData } from "@/lib/site";
 import { tokenMatches } from "@/lib/tokens";
-import { retryBooking } from "./actions";
+import type { Booking } from "@/lib/types";
+import { resumePayment, retryBooking } from "./actions";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
+
+type View = "confirmed" | "request" | "processing" | "bank" | "hold" | "unpaid" | "declined";
+
+/** Which message the guest sees for a booking's current state. */
+function confirmationView(booking: Booking, { cancelledCheckout, returnedFromStripe }: { cancelledCheckout: boolean; returnedFromStripe: boolean }): View {
+  switch (booking.status) {
+    case "confirmed":
+      return "confirmed";
+    case "pending":
+      return "request";
+    case "awaiting_payment":
+      if (cancelledCheckout) return "unpaid";
+      if (!booking.holdExpiresAt) return "bank"; // delayed payment method in progress
+      return returnedFromStripe ? "processing" : "hold";
+    case "cancelled":
+      // Host declined a request, or cancelled after payment: not a payment problem.
+      if (!booking.stripeSessionId || booking.paymentStatus === "paid" || booking.paymentStatus === "refunded") return "declined";
+      return "unpaid";
+  }
+}
 
 export default async function ConfirmationPage({ params, searchParams }: PageProps<"/[locale]/booking/confirmation/[reference]">) {
   const { locale, reference } = await params;
@@ -21,46 +42,35 @@ export default async function ConfirmationPage({ params, searchParams }: PagePro
   const { property } = await getSiteData();
 
   const found = /^AB-[A-Z0-9]{6}$/.test(reference) ? await getRepository().getBookingByReference(reference) : null;
-  if (!found || !tokenMatches(query.t, found.accessToken)) {
-    return (
-      <section className="section">
-        <div className="container max-w-xl text-center">
-          <h1 className="text-3xl">{t.confirmation.notFound}</h1>
-          <Link href={`/${locale}/booking`} className="btn-primary mt-8">{t.confirmation.tryAgain}</Link>
-        </div>
-      </section>
-    );
-  }
+  // Unknown reference or wrong token: a real 404 (see not-found.tsx) without revealing which it was.
+  if (!found || !tokenMatches(query.t, found.accessToken)) notFound();
 
   const booking = await reconcileWithStripe(found);
-  const cancelledCheckout = query.cancelled === "1" && booking.status !== "confirmed";
-  const processing = booking.status === "awaiting_payment" && !cancelledCheckout && typeof query.session_id === "string";
+  const view = confirmationView(booking, { cancelledCheckout: query.cancelled === "1", returnedFromStripe: typeof query.session_id === "string" });
+  const timeFmt = new Intl.DateTimeFormat(locale === "bg" ? "bg-BG" : "en-GB", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short", timeZone: "Europe/Sofia" });
 
-  let Icon = Clock;
-  let title = t.confirmation.requestTitle;
-  let text = fmt(t.confirmation.requestText, { email: booking.guestEmail });
-  let tone = "bg-sea-50 text-sea-700";
-  if (booking.status === "confirmed") {
-    Icon = CircleCheck;
-    title = t.confirmation.paidTitle;
-    text = fmt(t.confirmation.paidText, { email: booking.guestEmail });
-    tone = "bg-green-50 text-green-700";
-  } else if (processing) {
-    title = t.confirmation.processingTitle;
-    text = t.confirmation.processingText;
-  } else if (booking.status === "cancelled" || cancelledCheckout || booking.status === "awaiting_payment") {
-    Icon = TriangleAlert;
-    title = t.confirmation.cancelledTitle;
-    text = t.confirmation.cancelledText;
-    tone = "bg-amber-50 text-amber-700";
-  }
+  const views = {
+    confirmed: { Icon: CircleCheck, tone: "bg-green-50 text-green-700", title: t.confirmation.paidTitle, text: fmt(t.confirmation.paidText, { email: booking.guestEmail }) },
+    request: { Icon: Clock, tone: "bg-sea-50 text-sea-700", title: t.confirmation.requestTitle, text: fmt(t.confirmation.requestText, { email: booking.guestEmail }) },
+    processing: { Icon: Clock, tone: "bg-sea-50 text-sea-700", title: t.confirmation.processingTitle, text: t.confirmation.processingText },
+    bank: { Icon: Clock, tone: "bg-sea-50 text-sea-700", title: t.confirmation.bankProcessingTitle, text: t.confirmation.bankProcessingText },
+    hold: {
+      Icon: Clock,
+      tone: "bg-amber-50 text-amber-700",
+      title: t.confirmation.holdTitle,
+      text: fmt(t.confirmation.holdText, { time: booking.holdExpiresAt ? timeFmt.format(new Date(booking.holdExpiresAt)) : "" }),
+    },
+    unpaid: { Icon: TriangleAlert, tone: "bg-amber-50 text-amber-700", title: t.confirmation.cancelledTitle, text: t.confirmation.cancelledText },
+    declined: { Icon: TriangleAlert, tone: "bg-amber-50 text-amber-700", title: t.confirmation.declinedTitle, text: t.confirmation.declinedText },
+  } as const;
+  const { Icon, tone, title, text } = views[view];
 
   const dateFmt = new Intl.DateTimeFormat(locale === "bg" ? "bg-BG" : "en-GB", { weekday: "short", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
   const showDate = (d: string) => dateFmt.format(new Date(`${d}T00:00:00Z`));
 
   return (
     <section className="section">
-      {processing && <AutoRefresh seconds={4} />}
+      {view === "processing" && <AutoRefresh seconds={4} />}
       <div className="container max-w-2xl">
         <div className="card p-6 sm:p-10">
           <span className={`grid h-14 w-14 place-items-center rounded-full ${tone}`}>
@@ -86,7 +96,18 @@ export default async function ConfirmationPage({ params, searchParams }: PagePro
           </dl>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            {(booking.status === "cancelled" || cancelledCheckout) && (
+            {view === "hold" && (
+              <form action={resumePayment}>
+                <input type="hidden" name="locale" value={locale} />
+                <input type="hidden" name="reference" value={booking.reference} />
+                <input type="hidden" name="token" value={booking.accessToken} />
+                <button type="submit" className="btn-primary">{t.confirmation.completePayment}</button>
+              </form>
+            )}
+            {view === "declined" && (
+              <Link href={`/${locale}/booking`} className="btn-primary">{t.confirmation.tryAgain}</Link>
+            )}
+            {view === "unpaid" && (
               <form action={retryBooking}>
                 <input type="hidden" name="locale" value={locale} />
                 <input type="hidden" name="reference" value={booking.reference} />

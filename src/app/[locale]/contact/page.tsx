@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Mail, MapPin, Phone } from "lucide-react";
@@ -7,7 +8,7 @@ import { getSiteData } from "@/lib/site";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/contact">): Promise<Metadata> {
   const { locale } = await params;
-  return isLocale(locale) ? { title: getDictionary(locale).meta.contact } : {};
+  return isLocale(locale) ? pageMetadata(locale, "/contact", getDictionary(locale).meta.contact) : {};
 }
 
 export default async function ContactPage({ params }: PageProps<"/[locale]/contact">) {

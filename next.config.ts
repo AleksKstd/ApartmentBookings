@@ -13,6 +13,14 @@ const supabaseOrigin = (() => {
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  images: {
+    formats: ["image/avif", "image/webp"],
+    // Uploaded photos: Supabase Storage in production, /api/media in demo mode; /demo/* starter SVGs
+    // are served as-is (next/image never optimises SVG).
+    remotePatterns: supabaseOrigin ? [new URL(`${supabaseOrigin}/storage/v1/object/public/media/**`)] : [],
+    localPatterns: [{ pathname: "/api/media/**", search: "" }, { pathname: "/demo/**", search: "" }],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+  },
   experimental: {
     // With Supabase, photos upload straight from the browser to Storage, so server actions only carry
     // small forms. The demo store has no Storage and uploads through a server action instead.
