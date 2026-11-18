@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type Stripe from "stripe";
-import { applyCheckoutSession } from "@/lib/booking-service";
+import { applyCheckoutSession, failAsyncPayment } from "@/lib/booking-service";
 import { getRepository } from "@/lib/data";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 
@@ -28,23 +28,15 @@ export async function POST(request: NextRequest) {
       case "checkout.session.expired":
         await applyCheckoutSession(event.data.object);
         break;
-      case "checkout.session.async_payment_failed": {
-        const booking = await getRepository().getBookingByStripeSession(event.data.object.id);
-        if (booking && booking.status === "awaiting_payment") {
-          await getRepository().updateBooking(booking.id, {
-            status: "cancelled",
-            paymentStatus: "failed",
-            cancelledAt: new Date().toISOString(),
-          });
-        }
+      case "checkout.session.async_payment_failed":
+        await failAsyncPayment(event.data.object.id);
         break;
-      }
       case "charge.refunded": {
         const charge = event.data.object;
         const intent = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id;
         if (intent && charge.refunded) {
-          const [booking] = (await getRepository().listBookings()).filter((b) => b.stripePaymentIntent === intent);
-          if (booking) await getRepository().updateBooking(booking.id, { paymentStatus: "refunded" });
+          const booking = await getRepository().getBookingByPaymentIntent(intent);
+          if (booking && booking.paymentStatus !== "refunded") await getRepository().updateBooking(booking.id, { paymentStatus: "refunded" });
         }
         break;
       }

@@ -8,6 +8,7 @@ import type { BlockedRange, Booking, CalendarFeed, MediaItem, OutboxEmail, Seaso
 import { DEFAULT_SETTINGS, demoMedia } from "./defaults";
 import {
   BookingConflictError,
+  type BookingExpectation,
   type BookingFilter,
   type NewBooking,
   type Repository,
@@ -214,6 +215,10 @@ export class DemoRepository implements Repository {
     return this.read((db) => db.bookings.find((b) => b.stripeSessionId === sessionId) ?? null);
   }
 
+  getBookingByPaymentIntent(paymentIntentId: string) {
+    return this.read((db) => db.bookings.find((b) => b.stripePaymentIntent === paymentIntentId) ?? null);
+  }
+
   createBooking(booking: NewBooking) {
     return this.write((db) => {
       const now = new Date();
@@ -221,7 +226,7 @@ export class DemoRepository implements Repository {
         const clash = db.bookings.some(
           (b) => bookingBlocksCalendar(b, now) && rangesOverlap(b.checkIn, b.checkOut, booking.checkIn, booking.checkOut),
         );
-        if (clash) throw new BookingConflictError();
+        if (clash || overlapsBlocked(db.blocked, booking.checkIn, booking.checkOut)) throw new BookingConflictError();
       }
       const created: Booking = { ...booking, id: randomUUID(), createdAt: now.toISOString(), updatedAt: now.toISOString() };
       db.bookings.push(created);
@@ -230,19 +235,16 @@ export class DemoRepository implements Repository {
   }
 
   updateBooking(id: string, patch: Partial<NewBooking>) {
+    return this.write((db) => applyBookingPatch(db, id, patch));
+  }
+
+  updateBookingIf(id: string, expected: BookingExpectation, patch: Partial<NewBooking>) {
     return this.write((db) => {
       const b = db.bookings.find((x) => x.id === id);
-      if (!b) throw new Error("booking_not_found");
-      const next = { ...b, ...patch, updatedAt: new Date().toISOString() };
-      if (next.status !== "cancelled" && (patch.checkIn || patch.checkOut || patch.status)) {
-        const now = new Date();
-        const clash = db.bookings.some(
-          (o) => o.id !== id && bookingBlocksCalendar(o, now) && rangesOverlap(o.checkIn, o.checkOut, next.checkIn, next.checkOut),
-        );
-        if (clash) throw new BookingConflictError();
-      }
-      Object.assign(b, next);
-      return b;
+      if (!b) return null;
+      if (expected.status && b.status !== expected.status) return null;
+      if (expected.paymentStatus && b.paymentStatus !== expected.paymentStatus) return null;
+      return applyBookingPatch(db, id, patch);
     });
   }
 
@@ -268,6 +270,13 @@ export class DemoRepository implements Repository {
 
   createBlockedRange(range: Omit<BlockedRange, "id">) {
     return this.write((db) => {
+      if (range.source === "manual") {
+        const now = new Date();
+        const clash = db.bookings.some(
+          (b) => bookingBlocksCalendar(b, now) && rangesOverlap(b.checkIn, b.checkOut, range.startDate, range.endDate),
+        );
+        if (clash) throw new BookingConflictError();
+      }
       const created = { ...range, id: randomUUID() };
       db.blocked.push(created);
       return created;
@@ -335,4 +344,26 @@ export class DemoRepository implements Repository {
   listEmails(limit = 50) {
     return this.read((db) => db.emails.slice(0, limit));
   }
+}
+
+function overlapsBlocked(blocked: BlockedRange[], checkIn: string, checkOut: string): boolean {
+  return blocked.some((r) => rangesOverlap(r.startDate, r.endDate, checkIn, checkOut));
+}
+
+/** Mirrors the database rules: no overlap with active bookings or blocked ranges (see migrations). */
+function applyBookingPatch(db: DemoDb, id: string, patch: Partial<NewBooking>): Booking {
+  const b = db.bookings.find((x) => x.id === id);
+  if (!b) throw new Error("booking_not_found");
+  const next = { ...b, ...patch, updatedAt: new Date().toISOString() };
+  const datesChanged = next.checkIn !== b.checkIn || next.checkOut !== b.checkOut;
+  const reactivated = b.status === "cancelled" && next.status !== "cancelled";
+  if (next.status !== "cancelled" && (datesChanged || reactivated)) {
+    const now = new Date();
+    const clash = db.bookings.some(
+      (o) => o.id !== id && bookingBlocksCalendar(o, now) && rangesOverlap(o.checkIn, o.checkOut, next.checkIn, next.checkOut),
+    );
+    if (clash || overlapsBlocked(db.blocked, next.checkIn, next.checkOut)) throw new BookingConflictError();
+  }
+  Object.assign(b, next);
+  return b;
 }

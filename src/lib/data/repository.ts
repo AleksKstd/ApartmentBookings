@@ -1,3 +1,4 @@
+import type { RateLimitStore } from "@/lib/rate-limit";
 import type {
   BlockedRange,
   Booking,
@@ -28,6 +29,12 @@ export interface BookingFilter {
   limit?: number;
 }
 
+/** Optimistic-concurrency guard: the update only applies while the row still has these values. */
+export interface BookingExpectation {
+  status?: BookingStatus;
+  paymentStatus?: Booking["paymentStatus"];
+}
+
 export interface UploadInput {
   fileName: string;
   contentType: string;
@@ -41,7 +48,7 @@ export class BookingConflictError extends Error {
   }
 }
 
-export interface Repository {
+export interface Repository extends RateLimitStore {
   readonly mode: "demo" | "supabase";
 
   getSettings(): Promise<SiteSettings>;
@@ -67,9 +74,12 @@ export interface Repository {
   getBooking(id: string): Promise<Booking | null>;
   getBookingByReference(reference: string): Promise<Booking | null>;
   getBookingByStripeSession(sessionId: string): Promise<Booking | null>;
+  getBookingByPaymentIntent(paymentIntentId: string): Promise<Booking | null>;
   /** Inserts atomically; throws BookingConflictError on overlap with an active booking. */
   createBooking(booking: NewBooking): Promise<Booking>;
   updateBooking(id: string, patch: Partial<NewBooking>): Promise<Booking>;
+  /** Like updateBooking, but returns null (and changes nothing) if the row no longer matches. */
+  updateBookingIf(id: string, expected: BookingExpectation, patch: Partial<NewBooking>): Promise<Booking | null>;
   /** Cancels unpaid bookings whose hold has expired so their dates are released. */
   expireStaleHolds(now?: Date): Promise<number>;
 

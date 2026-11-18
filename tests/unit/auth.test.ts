@@ -13,7 +13,7 @@ describe("session tokens", () => {
 
   it("rejects expired, tampered and foreign-secret tokens", async () => {
     const token = await createSessionToken("owner", 1_000, secret);
-    expect(await verifySessionToken(token, 1_000 + 13 * 3600 * 1000, secret)).toBeNull();
+    expect(await verifySessionToken(token, 1_000 + 9 * 3600 * 1000, secret)).toBeNull();
     const [u, exp, sig] = token.split(".");
     expect(await verifySessionToken(`${u}.${Number(exp) + 1000}.${sig}`, 2_000, secret)).toBeNull();
     expect(await verifySessionToken(token, 2_000, "y".repeat(40))).toBeNull();

@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { NON_PAGE_CSP } from "./src/lib/csp";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -10,31 +11,20 @@ const supabaseOrigin = (() => {
   }
 })();
 
-const csp = [
-  "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
-  "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: ${supabaseOrigin}`.trim(),
-  "font-src 'self' data:",
-  `connect-src 'self' ${supabaseOrigin}${isDev ? " ws:" : ""}`.replace(/\s+/g, " ").trim(),
-  "frame-src https://www.openstreetmap.org",
-  "frame-ancestors 'none'",
-  "form-action 'self' https://checkout.stripe.com",
-  "base-uri 'self'",
-  "object-src 'none'",
-].join("; ");
-
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   experimental: {
-    serverActions: { bodySizeLimit: "12mb" }, // photo uploads
+    // With Supabase, photos upload straight from the browser to Storage, so server actions only carry
+    // small forms. The demo store has no Storage and uploads through a server action instead.
+    serverActions: { bodySizeLimit: supabaseOrigin ? "1mb" : "12mb" },
   },
   async headers() {
     return [
+      // HTML pages get a nonce-based CSP from src/proxy.ts; everything else gets a deny-all policy.
+      { source: "/api/:path*", headers: [{ key: "Content-Security-Policy", value: NON_PAGE_CSP }] },
       {
         source: "/:path*",
         headers: [
-          { key: "Content-Security-Policy", value: csp },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "DENY" },

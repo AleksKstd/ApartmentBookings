@@ -24,6 +24,8 @@ export class BookingError extends Error {
 }
 
 export const HOLD_MINIMUM_MINUTES = 32;
+/** Smallest amount (in cents) Stripe accepts for EUR/BGN Checkout. */
+export const STRIPE_MINIMUM_CHARGE = 50;
 
 const REFERENCE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
@@ -80,7 +82,8 @@ export async function createGuestBooking(input: BookingRequest): Promise<{ redir
   const repo = getRepository();
   const { quote, settings } = await priceStay(input.checkIn, input.checkOut, input.guests);
   const { pricing, property } = settings;
-  const usePayments = isStripeConfigured();
+  // Stripe cannot charge less than about €0.50; a free or near-free stay becomes a host-confirmed request.
+  const usePayments = isStripeConfigured() && quote.total >= STRIPE_MINIMUM_CHARGE;
   // Stripe requires a Checkout session to live at least 30 minutes; the session expires one minute
   // before the hold so a guest can never pay for dates that were already released.
   const holdMinutes = Math.max(HOLD_MINIMUM_MINUTES, pricing.holdMinutes);
@@ -149,7 +152,7 @@ export async function createGuestBooking(input: BookingRequest): Promise<{ redir
       payment_intent_data: { metadata: { bookingId: booking.id, reference: booking.reference } },
       success_url: `${base}${confirmationPath(booking)}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}${confirmationPath(booking)}&cancelled=1`,
-    });
+    }, { idempotencyKey: `checkout-${booking.id}` });
     booking = await repo.updateBooking(booking.id, { stripeSessionId: session.id });
     if (!session.url) throw new Error("Stripe returned no checkout URL");
     return { booking, redirectUrl: session.url };
@@ -178,9 +181,13 @@ async function createWithUniqueReference(draft: NewBooking): Promise<Booking> {
   }
 }
 
+const PAID_AFTER_CANCEL_NOTE =
+  "ВНИМАНИЕ: плащането пристигна след като резервацията беше отказана или датите бяха заети — нужно е възстановяване на сумата.";
+
 /**
- * Applies a completed Checkout session to its booking. Idempotent — safe to call from the webhook
- * and from the confirmation page (which reconciles if the webhook is delayed).
+ * Applies a Checkout session to its booking. Idempotent and race-safe — the webhook and the
+ * confirmation page may both call it at once; every write is conditional on the state it read, so
+ * only one caller wins and only the winner sends emails.
  */
 export async function applyCheckoutSession(session: Stripe.Checkout.Session): Promise<Booking | null> {
   const repo = getRepository();
@@ -188,42 +195,110 @@ export async function applyCheckoutSession(session: Stripe.Checkout.Session): Pr
     (await repo.getBookingByStripeSession(session.id)) ??
     (session.metadata?.bookingId ? await repo.getBooking(session.metadata.bookingId) : null);
   if (!booking) return null;
+  const reload = async () => (await repo.getBooking(booking.id)) ?? booking;
 
   if (session.status === "expired") {
-    if (booking.status === "awaiting_payment") {
-      return repo.updateBooking(booking.id, { status: "cancelled", cancelledAt: new Date().toISOString() });
-    }
-    return booking;
+    if (booking.status !== "awaiting_payment") return booking;
+    return (
+      (await repo.updateBookingIf(booking.id, { status: "awaiting_payment" }, { status: "cancelled", cancelledAt: new Date().toISOString() })) ??
+      reload()
+    );
+  }
+
+  if (session.status !== "complete") return booking;
+
+  if (session.payment_status === "unpaid") {
+    // Delayed payment method (e.g. SEPA debit / bank transfer): Stripe confirms days later via
+    // checkout.session.async_payment_succeeded|failed. Keep holding the dates until then instead of
+    // letting the hold lapse and the dates be resold while the guest's money is in flight.
+    if (booking.status !== "awaiting_payment" || !booking.holdExpiresAt) return booking;
+    return (
+      (await repo.updateBookingIf(
+        booking.id,
+        { status: "awaiting_payment", paymentStatus: "unpaid" },
+        { holdExpiresAt: null, adminNote: [booking.adminNote, "Плащането се обработва от банката (отложен метод)."].filter(Boolean).join("\n") },
+      )) ?? reload()
+    );
   }
 
   if (session.payment_status !== "paid" || booking.paymentStatus === "paid") return booking;
 
   const paymentIntent = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
-  const now = new Date().toISOString();
+  const expected = { paymentStatus: booking.paymentStatus, status: booking.status };
+
+  // Cancelled by the owner (or released) before the money arrived: never silently resurrect it.
+  if (booking.status === "cancelled") {
+    const flagged = await repo.updateBookingIf(booking.id, expected, {
+      paymentStatus: "paid",
+      stripePaymentIntent: paymentIntent,
+      adminNote: [booking.adminNote, PAID_AFTER_CANCEL_NOTE].filter(Boolean).join("\n"),
+    });
+    if (flagged) await sendAdminNotification(flagged, "paid");
+    return flagged ?? reload();
+  }
+
   try {
-    const updated = await repo.updateBooking(booking.id, {
+    const updated = await repo.updateBookingIf(booking.id, expected, {
       status: "confirmed",
       paymentStatus: "paid",
       stripePaymentIntent: paymentIntent,
       holdExpiresAt: null,
-      confirmedAt: now,
+      confirmedAt: new Date().toISOString(),
       cancelledAt: null,
     });
+    if (!updated) return reload(); // another request already applied this payment
     await Promise.all([sendGuestEmail("confirmed", updated), sendAdminNotification(updated, "paid")]);
     return updated;
   } catch (error) {
     if (!(error instanceof BookingConflictError)) throw error;
-    // Paid after the hold expired and someone else took the dates: keep it cancelled, flag for refund.
-    const flagged = await repo.updateBooking(booking.id, {
+    // The dates were taken in the meantime: keep it cancelled and flag for a refund.
+    const flagged = await repo.updateBookingIf(booking.id, expected, {
+      status: "cancelled",
+      cancelledAt: new Date().toISOString(),
       paymentStatus: "paid",
       stripePaymentIntent: paymentIntent,
-      adminNote: [booking.adminNote, "ВНИМАНИЕ: платено след изтичане на задържането, датите са заети — нужно е възстановяване на сумата."]
-        .filter(Boolean)
-        .join("\n"),
+      adminNote: [booking.adminNote, PAID_AFTER_CANCEL_NOTE].filter(Boolean).join("\n"),
     });
-    await sendAdminNotification(flagged, "paid");
-    return flagged;
+    if (flagged) await sendAdminNotification(flagged, "paid");
+    return flagged ?? reload();
   }
+}
+
+/** Marks a delayed (async) payment as failed and releases the dates. */
+export async function failAsyncPayment(sessionId: string): Promise<void> {
+  const repo = getRepository();
+  const booking = await repo.getBookingByStripeSession(sessionId);
+  if (!booking || booking.status !== "awaiting_payment") return;
+  await repo.updateBookingIf(booking.id, { status: "awaiting_payment", paymentStatus: "unpaid" }, {
+    status: "cancelled",
+    paymentStatus: "failed",
+    cancelledAt: new Date().toISOString(),
+  });
+}
+
+/**
+ * Stops a pending Stripe Checkout before the owner cancels an unpaid booking, so the guest cannot
+ * pay for a stay that no longer exists. Returns "paid" if the guest paid in the meantime (the
+ * payment is applied and the caller should not cancel).
+ */
+export async function closeCheckoutForCancellation(booking: Booking): Promise<"closed" | "paid" | "none"> {
+  if (booking.status !== "awaiting_payment" || !booking.stripeSessionId || !isStripeConfigured()) return "none";
+  const stripe = getStripe();
+  const session = await stripe.checkout.sessions.retrieve(booking.stripeSessionId);
+  if (session.status === "open") {
+    try {
+      await stripe.checkout.sessions.expire(session.id);
+      return "closed";
+    } catch {
+      // Raced with the guest completing payment: fall through and re-read the session.
+    }
+  }
+  const latest = session.status === "open" ? await stripe.checkout.sessions.retrieve(session.id) : session;
+  if (latest.status === "complete" && latest.payment_status === "paid") {
+    await applyCheckoutSession(latest);
+    return "paid";
+  }
+  return "closed";
 }
 
 /** Confirmation-page fallback: if the webhook has not arrived yet, ask Stripe directly. */
@@ -260,5 +335,11 @@ export async function releaseAbandonedCheckout(booking: Booking): Promise<Bookin
       return booking; // keep the hold; it lapses on its own
     }
   }
-  return repo.updateBooking(booking.id, { status: "cancelled", cancelledAt: new Date().toISOString(), adminNote: "Guest abandoned checkout" });
+  return (
+    (await repo.updateBookingIf(booking.id, { status: "awaiting_payment" }, {
+      status: "cancelled",
+      cancelledAt: new Date().toISOString(),
+      adminNote: [booking.adminNote, "Guest abandoned checkout"].filter(Boolean).join("\n"),
+    })) ?? (await repo.getBooking(booking.id)) ?? booking
+  );
 }

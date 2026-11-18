@@ -6,15 +6,16 @@ import { redirect, unstable_rethrow } from "next/navigation";
 import { z } from "zod";
 import { endAdminSession, requireAdmin, startAdminSession } from "@/lib/auth/admin";
 import { verifyAdminCredentials } from "@/lib/auth/password";
-import { generateAccessToken, generateReference } from "@/lib/booking-service";
+import { closeCheckoutForCancellation, generateAccessToken, generateReference } from "@/lib/booking-service";
 import { syncFeed, validateFeedUrl } from "@/lib/calendar-sync";
+import { UnsafeUrlError } from "@/lib/net-guard";
 import { BookingConflictError, getRepository, isDemoMode } from "@/lib/data";
 import { AMENITY_KEYS } from "@/lib/data/defaults";
 import { diffDays, isIsoDate, rangesOverlap } from "@/lib/dates";
 import { sendGuestEmail } from "@/lib/email";
 import { MAX_UPLOAD_BYTES, extensionFor, sniffImageType } from "@/lib/image-sniff";
 import { PricingError, calculateQuote } from "@/lib/pricing";
-import { clientIp, rateLimit, resetRateLimit } from "@/lib/rate-limit";
+import { clientIp, resetSharedRateLimit, sharedRateLimit } from "@/lib/rate-limit";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import type { HomepageContent, Localized, PricingSettings, PropertyInfo } from "@/lib/types";
 
@@ -22,6 +23,9 @@ export interface ActionResult {
   ok: boolean;
   message: string;
 }
+
+/** Validation problems whose message is safe (and meant) to show to the owner. */
+class AdminInputError extends Error {}
 
 const ok = (message: string): ActionResult => ({ ok: true, message });
 const fail = (message: string): ActionResult => ({ ok: false, message });
@@ -36,13 +40,30 @@ const localized = (fd: FormData, key: string, max = 5000): Localized => ({ bg: s
 /** "12,50" / "12.50" (euros) → 1250 cents */
 function parseMoney(value: string): number {
   const n = Number(value.replace(",", ".").replace(/\s/g, ""));
-  if (!Number.isFinite(n) || n < 0 || n > 1_000_000) throw new Error("Невалидна сума");
+  if (!Number.isFinite(n) || n < 0 || n > 1_000_000) throw new AdminInputError("Невалидна сума");
   return Math.round(n * 100);
 }
 
+const FIELD_LABELS: Record<string, string> = {
+  includedGuests: "Включени гости",
+  maxGuests: "Максимален брой гости",
+  minNights: "Минимален престой",
+  maxNights: "Максимален престой",
+  weeklyDiscountPercent: "Седмична отстъпка",
+  monthlyDiscountPercent: "Месечна отстъпка",
+  bookingWindowDays: "Резервации напред (дни)",
+  holdMinutes: "Задържане (минути)",
+  bedrooms: "Спални",
+  bathrooms: "Бани",
+  beds: "Легла",
+  areaSqm: "Площ",
+};
+
 function intField(fd: FormData, key: string, min: number, max: number): number {
   const n = Number(fd.get(key));
-  if (!Number.isInteger(n) || n < min || n > max) throw new Error(`Невалидна стойност за „${key}“ (${min}–${max})`);
+  if (!Number.isInteger(n) || n < min || n > max) {
+    throw new AdminInputError(`Невалидна стойност за „${FIELD_LABELS[key] ?? key}“ (цяло число от ${min} до ${max}).`);
+  }
   return n;
 }
 
@@ -53,8 +74,10 @@ async function guarded(fn: () => Promise<ActionResult>): Promise<ActionResult> {
   } catch (error) {
     unstable_rethrow(error); // let redirect()/notFound() propagate
     if (error instanceof BookingConflictError) return fail("Датите се застъпват с друга активна резервация.");
+    if (error instanceof AdminInputError || error instanceof UnsafeUrlError) return fail(error.message);
+    // Anything else may be a raw database/Stripe message: log it, show a generic one.
     console.error("[admin]", error);
-    return fail(error instanceof Error ? error.message : "Възникна грешка");
+    return fail("Възникна грешка. Опитайте отново или проверете дневника на сървъра.");
   }
 }
 
@@ -64,7 +87,7 @@ async function guarded(fn: () => Promise<ActionResult>): Promise<ActionResult> {
 
 export async function login(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const ip = clientIp(await headers());
-  if (!rateLimit(`login:${ip}`, 5, 15 * 60_000)) {
+  if (!(await sharedRateLimit(getRepository(), `login:${ip}`, 5, 15 * 60_000))) {
     return fail("Твърде много неуспешни опити. Опитайте отново след 15 минути.");
   }
   const username = str(formData, "username", 100);
@@ -72,7 +95,7 @@ export async function login(_prev: ActionResult | null, formData: FormData): Pro
   if (!(await verifyAdminCredentials(username, password, isDemoMode()))) {
     return fail("Невалидно потребителско име или парола.");
   }
-  resetRateLimit(`login:${ip}`);
+  await resetSharedRateLimit(getRepository(), `login:${ip}`);
   await startAdminSession(username);
   redirect("/admin");
 }
@@ -110,6 +133,11 @@ export async function cancelBooking(id: string, formData: FormData): Promise<Act
     const booking = await repo.getBooking(id);
     if (!booking) return fail("Резервацията не е намерена.");
     if (booking.status === "cancelled") return ok("Резервацията вече е отказана.");
+    // Close the guest's open Stripe payment page first, so they cannot pay for a cancelled stay.
+    if ((await closeCheckoutForCancellation(booking)) === "paid") {
+      refreshEverything();
+      return fail("Гостът току-що плати и резервацията е потвърдена. Ако все пак искате да я откажете, опитайте отново (с възстановяване на сумата).");
+    }
     const refund = formData.get("refund") === "on";
     const notify = formData.get("notify") === "on";
     let refunded = false;
@@ -331,12 +359,14 @@ export async function saveSeasonalRate(_prev: ActionResult | null, formData: For
     const endDate = str(formData, "endDate", 10);
     if (!isIsoDate(startDate) || !isIsoDate(endDate) || endDate < startDate) return fail("Невалиден период.");
     const minNights = str(formData, "minNights", 4);
+    const nightly = parseMoney(str(formData, "nightly", 20));
+    if (nightly <= 0) return fail("Сезонната цена трябва да е по-голяма от 0.");
     await getRepository().saveSeasonalRate({
       id: str(formData, "id", 64) || undefined,
       name: str(formData, "name", 80) || "Сезон",
       startDate,
       endDate,
-      nightly: parseMoney(str(formData, "nightly", 20)),
+      nightly,
       minNights: minNights ? intField(formData, "minNights", 1, 365) : null,
     });
     refreshEverything();
@@ -497,12 +527,12 @@ export async function saveProperty(_prev: ActionResult | null, formData: FormDat
       const raw = str(formData, key, 20);
       if (!raw) return null;
       const n = Number(raw.replace(",", "."));
-      if (!Number.isFinite(n) || Math.abs(n) > limit) throw new Error("Невалидни координати");
+      if (!Number.isFinite(n) || Math.abs(n) > limit) throw new AdminInputError("Невалидни координати");
       return n;
     };
     const time = (key: string) => {
       const v = str(formData, key, 5);
-      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(v)) throw new Error("Часът трябва да е във формат ЧЧ:ММ");
+      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(v)) throw new AdminInputError("Часът трябва да е във формат ЧЧ:ММ");
       return v;
     };
     const mapUrl = str(formData, "mapUrl", 500);

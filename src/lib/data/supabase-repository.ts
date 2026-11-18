@@ -5,6 +5,7 @@ import type { BlockedRange, Booking, CalendarFeed, MediaItem, OutboxEmail, Seaso
 import { DEFAULT_SETTINGS } from "./defaults";
 import {
   BookingConflictError,
+  type BookingExpectation,
   type BookingFilter,
   type NewBooking,
   type Repository,
@@ -13,6 +14,7 @@ import {
 } from "./repository";
 
 const MEDIA_BUCKET = "media";
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- rows are mapped explicitly below */
 type Row = Record<string, any>;
@@ -280,7 +282,8 @@ export class SupabaseRepository implements Repository {
     return row ? toBooking(row) : null;
   }
 
-  getBooking(id: string) {
+  async getBooking(id: string) {
+    if (!UUID.test(id)) return null; // avoid surfacing Postgres "invalid input syntax for type uuid"
     return this.bookingBy("id", id);
   }
 
@@ -290,6 +293,10 @@ export class SupabaseRepository implements Repository {
 
   getBookingByStripeSession(sessionId: string) {
     return this.bookingBy("stripe_session_id", sessionId);
+  }
+
+  getBookingByPaymentIntent(paymentIntentId: string) {
+    return this.bookingBy("stripe_payment_intent", paymentIntentId);
   }
 
   async createBooking(booking: NewBooking) {
@@ -305,16 +312,25 @@ export class SupabaseRepository implements Repository {
   }
 
   async expireStaleHolds(now: Date = new Date()) {
-    const rows = check(
-      await this.db
-        .from("bookings")
-        .update({ status: "cancelled", cancelled_at: now.toISOString(), admin_note: "Payment hold expired" })
-        .eq("status", "awaiting_payment")
-        .neq("payment_status", "paid")
-        .lte("hold_expires_at", now.toISOString())
-        .select("id"),
-    ) as Row[];
-    return rows.length;
+    return Number(check(await this.db.rpc("expire_stale_holds", { p_now: now.toISOString() })) ?? 0);
+  }
+
+  async updateBookingIf(id: string, expected: BookingExpectation, patch: Partial<NewBooking>) {
+    let query = this.db.from("bookings").update(fromBooking(patch)).eq("id", id);
+    if (expected.status) query = query.eq("status", expected.status);
+    if (expected.paymentStatus) query = query.eq("payment_status", expected.paymentStatus);
+    const result = await query.select().maybeSingle();
+    if (result.error?.code === "23P01") throw new BookingConflictError();
+    const row = check(result as { data: Row | null; error: { message: string; code?: string } | null });
+    return row ? toBooking(row) : null;
+  }
+
+  async hitRateLimit(keyHash: string, limit: number, windowSeconds: number) {
+    return Boolean(check(await this.db.rpc("hit_rate_limit", { p_key: keyHash, p_limit: limit, p_window_seconds: windowSeconds })));
+  }
+
+  async resetRateLimit(keyHash: string) {
+    check(await this.db.from("rate_limits").delete().eq("key", keyHash));
   }
 
   async listBlockedRanges() {
@@ -331,13 +347,9 @@ export class SupabaseRepository implements Repository {
   }
 
   async replaceFeedRanges(feedId: string, ranges: Omit<BlockedRange, "id">[]) {
-    // Insert the fresh set first, then drop the old rows, so the calendar never has a gap.
-    const inserted = ranges.length
-      ? (check(await this.db.from("blocked_ranges").insert(ranges.map(fromBlocked)).select("id")) as Row[])
-      : [];
-    let del = this.db.from("blocked_ranges").delete().eq("feed_id", feedId);
-    if (inserted.length) del = del.not("id", "in", `(${inserted.map((r) => r.id).join(",")})`);
-    check(await del);
+    // One transaction in Postgres (see replace_feed_ranges): no gap, no partial state.
+    const payload = ranges.map((r) => ({ start_date: r.startDate, end_date: r.endDate, reason: r.reason, external_uid: r.externalUid }));
+    check(await this.db.rpc("replace_feed_ranges", { p_feed_id: feedId, p_ranges: payload }));
   }
 
   async listFeeds() {

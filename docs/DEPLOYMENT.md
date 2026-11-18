@@ -47,7 +47,7 @@ Set these environment variables:
 - `ADMIN_SESSION_SECRET`: at least 32 random characters, e.g. from `openssl rand -base64 48`. Changing it signs out
   all sessions.
 
-Login is limited to 5 attempts per IP per 15 minutes, and sessions last 12 hours.
+Login is limited to 5 attempts per IP per 15 minutes, and sessions last 8 hours. Changing `ADMIN_PASSWORD_HASH` (or `ADMIN_SESSION_SECRET`) signs every existing session out.
 
 ## 3. Stripe (optional)
 
