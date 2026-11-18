@@ -7,7 +7,7 @@ import { BookingConflictError, getRepository, type NewBooking } from "@/lib/data
 import { addDays, todayAtProperty } from "@/lib/dates";
 import { sendAdminNotification, sendGuestEmail } from "@/lib/email";
 import { PricingError, calculateQuote, type PricingErrorCode } from "@/lib/pricing";
-import { siteUrl } from "@/lib/site-url";
+import { confirmationPath, siteUrl } from "@/lib/site-url";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import type { Booking, PriceQuote } from "@/lib/types";
 import type { BookingRequest } from "@/lib/validation";
@@ -53,6 +53,10 @@ export async function loadAvailabilityContext() {
 
 /** Validates dates against availability and computes the price; throws BookingError. */
 export async function quoteStay(checkIn: string, checkOut: string, guests: number): Promise<PriceQuote> {
+  return (await priceStay(checkIn, checkOut, guests)).quote;
+}
+
+async function priceStay(checkIn: string, checkOut: string, guests: number) {
   const { settings, seasons, ranges, today } = await loadAvailabilityContext();
   const problem = validateStayDates(checkIn, checkOut, ranges, {
     bookingWindowDays: settings.pricing.bookingWindowDays,
@@ -60,15 +64,11 @@ export async function quoteStay(checkIn: string, checkOut: string, guests: numbe
   });
   if (problem) throw new BookingError(problem, problem === "too_far" ? settings.pricing.bookingWindowDays : undefined);
   try {
-    return calculateQuote(checkIn, checkOut, guests, settings.pricing, seasons);
+    return { settings, quote: calculateQuote(checkIn, checkOut, guests, settings.pricing, seasons) };
   } catch (error) {
     if (error instanceof PricingError) throw new BookingError(error.code, error.detail);
     throw error;
   }
-}
-
-export function confirmationPath(booking: Pick<Booking, "locale" | "reference" | "accessToken">) {
-  return `/${booking.locale}/booking/confirmation/${booking.reference}?t=${booking.accessToken}`;
 }
 
 /**
@@ -78,8 +78,8 @@ export function confirmationPath(booking: Pick<Booking, "locale" | "reference" |
  */
 export async function createGuestBooking(input: BookingRequest): Promise<{ redirectUrl: string; booking: Booking }> {
   const repo = getRepository();
-  const quote = await quoteStay(input.checkIn, input.checkOut, input.guests);
-  const { pricing, property } = await repo.getSettings();
+  const { quote, settings } = await priceStay(input.checkIn, input.checkOut, input.guests);
+  const { pricing, property } = settings;
   const usePayments = isStripeConfigured();
   // Stripe requires a Checkout session to live at least 30 minutes; the session expires one minute
   // before the hold so a guest can never pay for dates that were already released.

@@ -143,5 +143,3 @@ export const AMENITY_KEYS = [
   "crib",
   "selfCheckIn",
 ] as const;
-
-export type AmenityKey = (typeof AMENITY_KEYS)[number];

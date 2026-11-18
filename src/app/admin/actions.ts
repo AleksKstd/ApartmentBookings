@@ -34,7 +34,7 @@ const str = (fd: FormData, key: string, max = 5000) => String(fd.get(key) ?? "")
 const localized = (fd: FormData, key: string, max = 5000): Localized => ({ bg: str(fd, `${key}.bg`, max), en: str(fd, `${key}.en`, max) });
 
 /** "12,50" / "12.50" (euros) → 1250 cents */
-async function parseMoney(value: string): Promise<number> {
+function parseMoney(value: string): number {
   const n = Number(value.replace(",", ".").replace(/\s/g, ""));
   if (!Number.isFinite(n) || n < 0 || n > 1_000_000) throw new Error("Невалидна сума");
   return Math.round(n * 100);
@@ -189,7 +189,7 @@ export async function createManualBooking(_prev: ActionResult | null, formData: 
       throw error;
     }
     const override = str(formData, "totalOverride", 20);
-    const total = override ? await parseMoney(override) : quote.total;
+    const total = override ? parseMoney(override) : quote.total;
     const now = new Date().toISOString();
     const booking = await repo.createBooking({
       reference: generateReference(),
@@ -303,11 +303,11 @@ export async function savePricing(_prev: ActionResult | null, formData: FormData
     const weekend = str(formData, "weekendNightly", 20);
     const pricing: PricingSettings = {
       currency: current.currency,
-      baseNightly: await parseMoney(str(formData, "baseNightly", 20)),
-      weekendNightly: weekend ? await parseMoney(weekend) : null,
-      cleaningFee: await parseMoney(str(formData, "cleaningFee", 20) || "0"),
+      baseNightly: parseMoney(str(formData, "baseNightly", 20)),
+      weekendNightly: weekend ? parseMoney(weekend) : null,
+      cleaningFee: parseMoney(str(formData, "cleaningFee", 20) || "0"),
       includedGuests: intField(formData, "includedGuests", 1, 50),
-      extraGuestNightly: await parseMoney(str(formData, "extraGuestNightly", 20) || "0"),
+      extraGuestNightly: parseMoney(str(formData, "extraGuestNightly", 20) || "0"),
       maxGuests: intField(formData, "maxGuests", 1, 50),
       minNights: intField(formData, "minNights", 1, 365),
       maxNights: intField(formData, "maxNights", 1, 3650),
@@ -336,7 +336,7 @@ export async function saveSeasonalRate(_prev: ActionResult | null, formData: For
       name: str(formData, "name", 80) || "Сезон",
       startDate,
       endDate,
-      nightly: await parseMoney(str(formData, "nightly", 20)),
+      nightly: parseMoney(str(formData, "nightly", 20)),
       minNights: minNights ? intField(formData, "minNights", 1, 365) : null,
     });
     refreshEverything();

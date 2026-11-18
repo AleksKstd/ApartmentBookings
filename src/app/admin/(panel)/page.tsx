@@ -4,6 +4,7 @@ import { Panel, PageHeader, StatusBadge, money, showDay } from "@/components/adm
 import { bookingBlocksCalendar } from "@/lib/availability";
 import { getRepository } from "@/lib/data";
 import { addDays, eachNight, todayAtProperty } from "@/lib/dates";
+import type { Booking } from "@/lib/types";
 
 export default async function DashboardPage() {
   const repo = getRepository();
@@ -73,7 +74,7 @@ export default async function DashboardPage() {
   );
 }
 
-function BookingRows({ bookings }: { bookings: Awaited<ReturnType<ReturnType<typeof getRepository>["listBookings"]>> }) {
+function BookingRows({ bookings }: { bookings: Booking[] }) {
   return (
     <ul className="divide-y divide-sand-200">
       {bookings.map((b) => (

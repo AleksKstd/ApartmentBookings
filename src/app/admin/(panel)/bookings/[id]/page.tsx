@@ -4,7 +4,7 @@ import { cancelBooking, confirmBooking, markBookingPaid, resendGuestEmail, saveA
 import { ActionButton, AdminForm } from "@/components/admin/form-kit";
 import { PageHeader, Panel, PaymentBadge, StatusBadge, money, showDateTime, showDay } from "@/components/admin/ui";
 import { getRepository } from "@/lib/data";
-import { siteUrl } from "@/lib/site-url";
+import { confirmationPath, siteUrl } from "@/lib/site-url";
 
 const LINE_LABELS: Record<string, string> = {
   nights: "Нощувки",
@@ -19,7 +19,7 @@ export default async function BookingDetailPage({ params }: PageProps<"/admin/bo
   const booking = await getRepository().getBooking(id);
   if (!booking) notFound();
   const q = booking.priceBreakdown;
-  const guestLink = `${siteUrl()}/${booking.locale}/booking/confirmation/${booking.reference}?t=${booking.accessToken}`;
+  const guestLink = `${siteUrl()}${confirmationPath(booking)}`;
 
   return (
     <>

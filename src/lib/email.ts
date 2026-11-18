@@ -2,7 +2,7 @@ import "server-only";
 import { fmt, getDictionary } from "@/i18n";
 import { getRepository } from "@/lib/data";
 import { formatMoney } from "@/lib/pricing";
-import { siteUrl } from "@/lib/site-url";
+import { confirmationPath, siteUrl } from "@/lib/site-url";
 import type { Booking, Locale, PropertyInfo } from "@/lib/types";
 
 interface Message {
@@ -62,10 +62,6 @@ export async function sendEmail(message: Message): Promise<boolean> {
   }
 }
 
-function bookingUrl(booking: Booking): string {
-  return `${siteUrl()}/${booking.locale}/booking/confirmation/${booking.reference}?t=${booking.accessToken}`;
-}
-
 function detailRows(booking: Booking, locale: Locale) {
   const t = getDictionary(locale);
   return [
@@ -108,7 +104,7 @@ export function renderGuestEmail(kind: GuestEmailKind, booking: Booking, propert
     subject,
     [fmt(t.email.greeting, { name: booking.guestName }), body],
     detailRows(booking, locale),
-    { href: bookingUrl(booking), label: t.email.viewBooking },
+    { href: `${siteUrl()}${confirmationPath(booking)}`, label: t.email.viewBooking },
   );
   return { subject, html, text };
 }

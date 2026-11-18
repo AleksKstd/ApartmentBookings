@@ -32,7 +32,7 @@ export default async function BookingPage({ params, searchParams }: PageProps<"/
         <p className="mb-10 mt-3 text-lg text-ink-muted">{t.booking.subtitle}</p>
         <BookingWidget
           locale={locale}
-          t={t}
+          t={{ booking: t.booking, common: t.common }}
           today={today}
           lastDay={lastDay}
           occupied={occupiedNights(ranges, today, lastDay)}

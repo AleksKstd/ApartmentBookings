@@ -12,7 +12,7 @@ import { AvailabilityCalendar } from "./availability-calendar";
 
 interface Props {
   locale: Locale;
-  t: Dictionary;
+  t: Pick<Dictionary, "booking" | "common">;
   today: string;
   lastDay: string;
   occupied: string[];
