@@ -5,7 +5,7 @@ vi.mock("node:dns/promises", () => ({
   lookup: async (host: string) => (dns.answers.get(host) ?? ["93.184.216.34"]).map((address) => ({ address, family: address.includes(":") ? 6 : 4 })),
 }));
 
-const { assertPublicHttpsUrl, isPrivateAddress, safeFetchText } = await import("@/lib/net-guard");
+const { assertPublicHttpsUrl, isPrivateAddress, pinnedLookup, safeFetchText } = await import("@/lib/net-guard");
 
 describe("isPrivateAddress", () => {
   it.each([
@@ -36,23 +36,19 @@ describe("assertPublicHttpsUrl", () => {
 });
 
 describe("safeFetchText", () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    dns.answers.clear();
-  });
-  const opts = { maxBytes: 100, timeoutMs: 1000 };
+  afterEach(() => dns.answers.clear());
+  const opts = (fetchImpl: ReturnType<typeof vi.fn>) => ({ maxBytes: 100, timeoutMs: 1000, fetchImpl: fetchImpl as never });
 
   it("refuses hostnames that resolve to private addresses (DNS rebinding style)", async () => {
     dns.answers.set("127.0.0.1.nip.io", ["127.0.0.1"]);
     const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
-    await expect(safeFetchText("https://127.0.0.1.nip.io/feed.ics", opts)).rejects.toThrow(/публичен/);
+    await expect(safeFetchText("https://127.0.0.1.nip.io/feed.ics", opts(fetchMock))).rejects.toThrow(/публичен/);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("re-validates every redirect hop", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => new Response(null, { status: 302, headers: { location: "https://169.254.169.254/latest/meta-data" } })));
-    await expect(safeFetchText("https://example.com/feed.ics", opts)).rejects.toThrow(/публичен/);
+    const fetchMock = vi.fn(async () => new Response(null, { status: 302, headers: { location: "https://169.254.169.254/latest/meta-data" } }));
+    await expect(safeFetchText("https://example.com/feed.ics", opts(fetchMock))).rejects.toThrow(/публичен/);
   });
 
   it("follows safe redirects and returns the body", async () => {
@@ -60,13 +56,19 @@ describe("safeFetchText", () => {
       .fn()
       .mockResolvedValueOnce(new Response(null, { status: 301, headers: { location: "/moved.ics" } }))
       .mockResolvedValueOnce(new Response("BEGIN:VCALENDAR"));
-    vi.stubGlobal("fetch", fetchMock);
-    expect(await safeFetchText("https://example.com/feed.ics", opts)).toBe("BEGIN:VCALENDAR");
+    expect(await safeFetchText("https://example.com/feed.ics", opts(fetchMock))).toBe("BEGIN:VCALENDAR");
     expect(String(fetchMock.mock.calls[1][0])).toBe("https://example.com/moved.ics");
   });
 
   it("stops reading bodies larger than the cap, even without content-length", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => new Response("x".repeat(500))));
-    await expect(safeFetchText("https://example.com/feed.ics", opts)).rejects.toThrow(/голям/);
+    const fetchMock = vi.fn(async () => new Response("x".repeat(500)));
+    await expect(safeFetchText("https://example.com/feed.ics", opts(fetchMock))).rejects.toThrow(/голям/);
+  });
+});
+
+describe("connect-time DNS check (anti DNS rebinding)", () => {
+  it("rejects a hostname that resolves to loopback at connection time", async () => {
+    const error = await new Promise((resolve) => pinnedLookup("localhost", {}, (err) => resolve(err)));
+    expect(String(error)).toMatch(/публичен/);
   });
 });

@@ -60,3 +60,6 @@ jobs:
           grep -q 'dates overlap a blocked range' integrity.log
           grep -q 'blocked range overlaps an active booking' integrity.log
           grep -q 'permission denied for function hit_rate_limit' integrity.log
+          grep -Eq '^ *t *\| *t *\| *t *\| *f *$' integrity.log
+          grep -q 'Payment hold expired' integrity.log
+          grep -q 'keep me' integrity.log

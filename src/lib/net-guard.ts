@@ -1,6 +1,8 @@
 import "server-only";
+import dns from "node:dns";
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
+import { Agent, fetch as undiciFetch } from "undici";
 
 /**
  * Outbound-request guard for admin-supplied URLs (calendar feeds). Blocks private, loopback,
@@ -66,6 +68,8 @@ function isPrivateV6(ip: string): boolean {
   if ((p[0] & 0xfe00) === 0xfc00) return true; // fc00::/7 unique local
   if ((p[0] & 0xffc0) === 0xfe80) return true; // fe80::/10 link-local
   if ((p[0] & 0xff00) === 0xff00) return true; // multicast
+  if (p[0] === 0x2002) return true; // 6to4 embeds an arbitrary (possibly private) IPv4
+  if (p[0] === 0x2001 && p[1] === 0x0000) return true; // Teredo embeds an IPv4 too
   if (p[0] === 0x2001 && p[1] === 0x0db8) return true; // documentation
   if (p[0] === 0x0064 && p[1] === 0xff9b) return true; // NAT64 can reach IPv4 internals
   return false;
@@ -109,18 +113,48 @@ export async function assertPublicDestination(url: URL): Promise<void> {
 }
 
 /**
- * fetch() for untrusted URLs: re-validates every redirect hop, enforces a timeout and streams the
- * body with a hard byte cap instead of buffering an unbounded response.
+ * DNS lookup used for the actual connection: every resolved address is validated at connect time,
+ * so a hostname cannot answer with a public IP for the pre-check and a private one for the
+ * connection (DNS rebinding).
+ */
+type LookupCallback = (error: Error | null, address: string | dns.LookupAddress[], family?: number) => void;
+
+export function pinnedLookup(hostname: string, options: dns.LookupOptions, callback: LookupCallback): void {
+  dns.lookup(hostname, { ...options, all: true }, (error, addresses) => {
+    if (error) return callback(error, "", 0);
+    const unsafe = addresses.find((a) => isPrivateAddress(a.address));
+    if (!addresses.length || unsafe) return callback(new UnsafeUrlError("Адресът трябва да сочи към публичен сървър."), "", 0);
+    if (options.all) return callback(null, addresses);
+    callback(null, addresses[0].address, addresses[0].family);
+  });
+}
+
+const guardedAgent = new Agent({ connect: { lookup: pinnedLookup as never } });
+
+type FetchLike = (url: URL, init: { headers?: HeadersInit; signal: AbortSignal; redirect: "manual" }) => Promise<Response>;
+
+const pinnedFetch: FetchLike = (url, init) =>
+  undiciFetch(url, { ...init, headers: init.headers as Record<string, string> | undefined, dispatcher: guardedAgent }) as unknown as Promise<Response>;
+
+/**
+ * fetch() for untrusted URLs: validates DNS before and during connection, re-validates every
+ * redirect hop, enforces a timeout and streams the body with a hard byte cap.
  */
 export async function safeFetchText(
   raw: string,
-  { maxBytes, timeoutMs, maxRedirects = 3, headers }: { maxBytes: number; timeoutMs: number; maxRedirects?: number; headers?: HeadersInit },
+  {
+    maxBytes,
+    timeoutMs,
+    maxRedirects = 3,
+    headers,
+    fetchImpl = pinnedFetch,
+  }: { maxBytes: number; timeoutMs: number; maxRedirects?: number; headers?: HeadersInit; fetchImpl?: FetchLike },
 ): Promise<string> {
   const signal = AbortSignal.timeout(timeoutMs);
   let url = assertPublicHttpsUrl(raw);
   for (let hop = 0; ; hop++) {
     await assertPublicDestination(url);
-    const res = await fetch(url, { headers, signal, redirect: "manual", cache: "no-store" });
+    const res = await fetchImpl(url, { headers, signal, redirect: "manual" });
     if (res.status >= 300 && res.status < 400 && res.headers.get("location")) {
       if (hop >= maxRedirects) throw new UnsafeUrlError("Твърде много пренасочвания.");
       url = assertPublicHttpsUrl(new URL(res.headers.get("location")!, url).toString());

@@ -237,6 +237,13 @@ export async function applyCheckoutSession(session: Stripe.Checkout.Session): Pr
     return flagged ?? reload();
   }
 
+  if (booking.status === "confirmed") {
+    // The owner confirmed it manually before the money arrived; the guest already has the email.
+    const updated = await repo.updateBookingIf(booking.id, expected, { paymentStatus: "paid", stripePaymentIntent: paymentIntent, holdExpiresAt: null });
+    if (updated) await sendAdminNotification(updated, "paid");
+    return updated ?? reload();
+  }
+
   try {
     const updated = await repo.updateBookingIf(booking.id, expected, {
       status: "confirmed",
@@ -290,13 +297,17 @@ export async function closeCheckoutForCancellation(booking: Booking): Promise<"c
       await stripe.checkout.sessions.expire(session.id);
       return "closed";
     } catch {
-      // Raced with the guest completing payment: fall through and re-read the session.
+      // Raced with the guest completing payment, or Stripe was unreachable: re-read the session.
     }
   }
   const latest = session.status === "open" ? await stripe.checkout.sessions.retrieve(session.id) : session;
   if (latest.status === "complete" && latest.payment_status === "paid") {
     await applyCheckoutSession(latest);
     return "paid";
+  }
+  if (latest.status === "open") {
+    // Never report success while the guest can still pay for a stay we are about to cancel.
+    throw new Error("Stripe Checkout session could not be expired");
   }
   return "closed";
 }

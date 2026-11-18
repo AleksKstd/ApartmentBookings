@@ -18,6 +18,8 @@ const stripe = {
   expired: [] as string[],
   /** Simulates the guest paying between our retrieve() and expire() calls. */
   payDuringExpire: false,
+  /** Simulates Stripe being unreachable while expiring a session. */
+  expireFails: false,
 };
 
 vi.mock("@/lib/stripe", () => ({
@@ -35,6 +37,7 @@ vi.mock("@/lib/stripe", () => ({
         retrieve: async (id: string) => ({ ...stripe.sessions.get(id)! }),
         expire: async (id: string) => {
           const s = stripe.sessions.get(id)!;
+          if (stripe.expireFails) throw new Error("network error");
           if (stripe.payDuringExpire) {
             Object.assign(s, { status: "complete", payment_status: "paid", payment_intent: `pi_${id}` });
             throw new Error("Only Checkout Sessions with a status of open can be expired");
@@ -76,6 +79,7 @@ afterAll(() => rmSync(dir, { recursive: true, force: true }));
 beforeEach(() => {
   stripe.configured = true;
   stripe.payDuringExpire = false;
+  stripe.expireFails = false;
 });
 
 describe("payment confirmation races", () => {
@@ -101,6 +105,24 @@ describe("owner cancels while the guest is on the payment page", () => {
     stripe.payDuringExpire = true;
     expect(await closeCheckoutForCancellation(booking)).toBe("paid");
     expect((await getRepository().getBooking(booking.id))?.status).toBe("confirmed");
+  });
+
+  it("refuses to report success when Stripe could not close the payment page", async () => {
+    const { booking } = await createGuestBooking(request());
+    stripe.expireFails = true;
+    await expect(closeCheckoutForCancellation(booking)).rejects.toThrow(/could not be expired/);
+  });
+
+  it("does not resend the confirmation when the owner confirmed before the money arrived", async () => {
+    const repo = getRepository();
+    const { booking } = await createGuestBooking(request());
+    await repo.updateBooking(booking.id, { status: "confirmed", confirmedAt: new Date().toISOString() });
+    const before = (await emailsFor(booking.reference)).length;
+    const result = await applyCheckoutSession(paid(booking.stripeSessionId!));
+    expect(result).toMatchObject({ status: "confirmed", paymentStatus: "paid" });
+    const added = (await emailsFor(booking.reference)).slice(0, (await emailsFor(booking.reference)).length - before);
+    expect(added.map((e) => e.to)).not.toContain("race@example.com"); // owner notified, guest not emailed twice
+    expect(added).toHaveLength(1);
   });
 
   it("never resurrects a cancelled booking when money arrives later — flags it for a refund", async () => {

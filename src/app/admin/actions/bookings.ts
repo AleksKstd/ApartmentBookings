@@ -40,7 +40,14 @@ export async function cancelBooking(id: string, formData: FormData): Promise<Act
     if (!booking) return fail("Резервацията не е намерена.");
     if (booking.status === "cancelled") return ok("Резервацията вече е отказана.");
     // Close the guest's open Stripe payment page first, so they cannot pay for a cancelled stay.
-    if ((await closeCheckoutForCancellation(booking)) === "paid") {
+    let checkout: Awaited<ReturnType<typeof closeCheckoutForCancellation>>;
+    try {
+      checkout = await closeCheckoutForCancellation(booking);
+    } catch (error) {
+      console.error("[admin] could not close Stripe checkout", error);
+      return fail("Страницата за плащане в Stripe не можа да бъде затворена, затова резервацията не е отказана. Опитайте отново след малко.");
+    }
+    if (checkout === "paid") {
       refreshEverything();
       return fail("Гостът току-що плати и резервацията е потвърдена. Ако все пак искате да я откажете, опитайте отново (с възстановяване на сумата).");
     }
