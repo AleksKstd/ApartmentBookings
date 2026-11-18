@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/site/footer";
 import { Header } from "@/components/site/header";
-import { LOCALES, getDictionary, isLocale, pick } from "@/i18n";
+import { getDictionary, isLocale, pick } from "@/i18n";
+import { pageMetadata } from "@/lib/seo";
 import { getSiteData } from "@/lib/site";
 
 export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Promise<Metadata> {
@@ -10,11 +11,12 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
   if (!isLocale(locale)) return {};
   const { property } = await getSiteData();
   const t = getDictionary(locale);
+  const home = pageMetadata(locale, "/", undefined, t.meta.siteDescription);
   return {
+    ...home,
     title: { default: `${property.name} — ${pick(property.tagline, locale)}`, template: `%s · ${property.name}` },
-    description: t.meta.siteDescription,
-    alternates: { languages: Object.fromEntries(LOCALES.map((l) => [l, `/${l}`])) },
-    openGraph: { siteName: property.name, locale: locale === "bg" ? "bg_BG" : "en_GB", type: "website" },
+    openGraph: { ...home.openGraph, siteName: property.name },
+    twitter: { card: "summary_large_image" },
   };
 }
 

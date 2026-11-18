@@ -41,6 +41,7 @@ export function parseIcal(text: string): IcalEvent[] {
         const start = startProp && toDay(startProp.value, startProp.params);
         const endProp = current.DTEND;
         let end = endProp ? toDay(endProp.value, endProp.params) : null;
+        if (end && !isIsoDate(end)) end = null; // e.g. 20260231: fall back to a one-night block
         const cancelled = current.STATUS?.value.trim().toUpperCase() === "CANCELLED";
         if (start && isIsoDate(start) && !cancelled) {
           if (!end || end <= start) end = addDays(start, 1);

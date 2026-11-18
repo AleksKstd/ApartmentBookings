@@ -1,0 +1,29 @@
+name: Calendar sync
+
+# Imports Booking.com / Airbnb calendars and releases expired payment holds every 30 minutes.
+# Needed on the Vercel Hobby plan, whose built-in cron runs at most once a day.
+# Set repository secrets SITE_URL (e.g. https://www.example.com) and CRON_SECRET (same value as in
+# Vercel). Without them the job does nothing.
+
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Call the sync endpoint
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$SITE_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "SITE_URL or CRON_SECRET secret not set; skipping."
+            exit 0
+          fi
+          curl --fail-with-body --silent --show-error --max-time 120 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "${SITE_URL%/}/api/cron/sync-calendars"

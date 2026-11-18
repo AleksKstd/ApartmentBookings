@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createManualBooking } from "@/app/admin/actions";
+import { createManualBooking } from "@/app/admin/actions/bookings";
 import { AdminForm, Field } from "@/components/admin/form-kit";
 import { PageHeader, Panel } from "@/components/admin/ui";
 

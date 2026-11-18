@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Globe, Menu, X } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/lib/types";
@@ -11,11 +11,21 @@ import { cn } from "@/lib/utils";
 export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary["nav"]; siteName: string }) {
   const pathname = usePathname() ?? `/${locale}`;
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
+      document.removeEventListener("keydown", onKey);
     };
   }, [open]);
 
@@ -40,7 +50,7 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
           {siteName}
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
+        <nav aria-label={t.mainNavLabel} className="hidden items-center gap-1 md:flex">
           {links.map((l) => (
             <Link
               key={l.href}
@@ -74,6 +84,7 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
             {t.bookNow}
           </Link>
           <button
+            ref={toggleRef}
             type="button"
             className="btn-ghost px-2.5 md:hidden"
             aria-expanded={open}
@@ -81,13 +92,13 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
             aria-label={open ? t.closeMenu : t.openMenu}
             onClick={() => setOpen((v) => !v)}
           >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {open ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
           </button>
         </div>
       </div>
 
       {open && (
-        <nav id="mobile-menu" aria-label="Mobile" className="animate-fade-in border-t border-sea-900/5 bg-sand-50 md:hidden">
+        <nav id="mobile-menu" aria-label={t.mobileNavLabel} className="animate-fade-in border-t border-sea-900/5 bg-sand-50 md:hidden">
           <ul className="container flex flex-col py-3">
             {links.map((l) => (
               <li key={l.href}>

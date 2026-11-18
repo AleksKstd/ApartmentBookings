@@ -53,7 +53,8 @@ test.describe.serial("guest booking → admin confirmation", () => {
     await adminLogin(page);
     await expect(page.getByText("Чакащи потвърждение")).toBeVisible();
     await page.goto("/admin/bookings?status=pending");
-    await page.getByRole("link", { name: reference }).click();
+    await page.getByRole("link", { name: reference, exact: true }).click();
+    await page.waitForURL(/\/admin\/bookings\/[0-9a-f-]{36}$/);
     await expect(page.getByText("Jane Traveller")).toBeVisible();
     await expect(page.getByText("Arriving around 18:00")).toBeVisible();
     await page.getByRole("button", { name: "Потвърди" }).click();

@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState, useTransition, useState } from "react";
+import { useActionState, useId, useRef, useTransition, useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import type { ActionResult } from "@/app/admin/actions";
+import type { ActionResult } from "@/app/admin/actions/shared";
 import { cn } from "@/lib/utils";
 
 type FormAction = (prev: ActionResult | null, formData: FormData) => Promise<ActionResult>;
@@ -33,14 +33,20 @@ export function AdminForm({
   className?: string;
   resetOnSuccess?: boolean;
 }) {
-  const [result, formAction, pending] = useActionState(action, null);
+  // React resets uncontrolled fields after every action, even one that returned an error. Remember
+  // the outcome so a failed submit never wipes what the owner typed.
+  const lastOk = useRef(false);
+  const [result, formAction, pending] = useActionState(async (prev: ActionResult | null, formData: FormData) => {
+    const next = await action(prev, formData);
+    lastOk.current = next.ok;
+    return next;
+  }, null);
   return (
     <form
       action={formAction}
       className={cn("space-y-4", className)}
-      // React resets uncontrolled fields after an action; keep them unless told otherwise.
       onReset={(e) => {
-        if (!resetOnSuccess) e.preventDefault();
+        if (!resetOnSuccess || !lastOk.current) e.preventDefault();
       }}
     >
       {children}
@@ -62,12 +68,15 @@ export function ActionButton({
   confirm,
   className = "btn-outline",
   title,
+  showSuccess = false,
 }: {
   action: () => Promise<ActionResult>;
   children: React.ReactNode;
   confirm?: string;
   className?: string;
   title?: string;
+  /** Also show the message when the action succeeds (e.g. connection tests). */
+  showSuccess?: boolean;
 }) {
   const [pending, start] = useTransition();
   const [result, setResult] = useState<ActionResult | null>(null);
@@ -87,7 +96,7 @@ export function ActionButton({
         {pending && <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />}
         {children}
       </button>
-      {result && !result.ok && <ResultMessage result={result} />}
+      {result && (!result.ok || showSuccess) && <ResultMessage result={result} />}
     </span>
   );
 }
@@ -99,11 +108,13 @@ export function Field({
   className,
   ...input
 }: { label: string; name: string; hint?: string; className?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  // Unique per instance: the same field name can appear in several forms on one page (e.g. seasons).
+  const id = `f-${name}-${useId()}`;
   return (
     <div className={className}>
-      <label className="label" htmlFor={`f-${name}`}>{label}</label>
-      <input id={`f-${name}`} name={name} className="input" {...input} />
-      {hint && <p className="mt-1 text-xs text-ink-muted">{hint}</p>}
+      <label className="label" htmlFor={id}>{label}</label>
+      <input id={id} name={name} className="input" aria-describedby={hint ? `${id}-hint` : undefined} {...input} />
+      {hint && <p id={`${id}-hint`} className="mt-1 text-xs text-ink-muted">{hint}</p>}
     </div>
   );
 }

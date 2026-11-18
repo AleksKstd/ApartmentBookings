@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { fmt, type Dictionary } from "@/i18n";
 import { cn } from "@/lib/utils";
@@ -69,15 +70,15 @@ export function Gallery({
                 lastTrigger.current = e.currentTarget;
                 show(i);
               }}
-              className="group block h-full w-full overflow-hidden rounded-2xl bg-sand-200"
-              aria-label={fmt(t.open, { n: i + 1 })}
+              className="group relative block aspect-[4/3] h-full w-full overflow-hidden rounded-2xl bg-sand-200"
+              aria-label={photo.alt ? `${fmt(t.open, { n: i + 1 })}: ${photo.alt}` : fmt(t.open, { n: i + 1 })}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element -- admin-uploaded images from storage */}
-              <img
+              <Image
                 src={photo.url}
-                alt={photo.alt}
-                loading="lazy"
-                className="aspect-[4/3] h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                alt=""
+                fill
+                sizes={variant === "preview" && i === 0 ? "(min-width: 768px) 50vw, 100vw" : "(min-width: 768px) 33vw, 50vw"}
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </button>
           </li>
@@ -98,20 +99,21 @@ export function Gallery({
       >
         {open !== null && (
           <div className="flex h-full flex-col items-center justify-center gap-4 p-4" onClick={(e) => e.target === e.currentTarget && setOpen(null)}>
-            {/* eslint-disable-next-line @next/next/no-img-element -- admin-uploaded images from storage */}
-            <img src={photos[open].url} alt={photos[open].alt} className="max-h-[80svh] max-w-full rounded-xl object-contain shadow-2xl" />
+            <div className="relative h-[80svh] w-full max-w-6xl">
+              <Image src={photos[open].url} alt={photos[open].alt} fill sizes="100vw" className="rounded-xl object-contain" />
+            </div>
             <p className="text-center text-sm text-sea-100">
               {photos[open].alt} · {fmt(carouselT.slide, { n: open + 1, total: count })}
             </p>
             <div className="flex gap-3">
               <button type="button" className="carousel-btn" onClick={() => show(open - 1)} aria-label={carouselT.previous}>
-                <ChevronLeft className="h-5 w-5" />
+                <ChevronLeft className="h-5 w-5" aria-hidden />
               </button>
               <button type="button" className="carousel-btn" onClick={() => setOpen(null)} aria-label={closeLabel} autoFocus>
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5" aria-hidden />
               </button>
               <button type="button" className="carousel-btn" onClick={() => show(open + 1)} aria-label={carouselT.next}>
-                <ChevronRight className="h-5 w-5" />
+                <ChevronRight className="h-5 w-5" aria-hidden />
               </button>
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { LoaderCircle } from "lucide-react";
-import { login } from "@/app/admin/actions";
+import { login } from "@/app/admin/actions/auth";
 import { ResultMessage } from "@/components/admin/form-kit";
 
 export function LoginForm() {

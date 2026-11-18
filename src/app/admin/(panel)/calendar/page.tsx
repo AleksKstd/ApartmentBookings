@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { addBlockedRange, deleteBlockedRange } from "@/app/admin/actions";
+import { addBlockedRange, deleteBlockedRange } from "@/app/admin/actions/calendar";
 import { ActionButton, AdminForm, Field } from "@/components/admin/form-kit";
 import { PageHeader, Panel, showDay } from "@/components/admin/ui";
 import { bookingBlocksCalendar } from "@/lib/availability";

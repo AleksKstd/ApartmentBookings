@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { addDays, addMonths, daysInMonth, parseDay, startOfMonth, weekday } from "@/lib/dates";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,8 @@ export interface CalendarLabels {
   available: string;
   unavailable: string;
   selected: string;
+  calendarHelp: string;
+  pastDay: string;
 }
 
 interface Props {
@@ -56,6 +58,17 @@ export function AvailabilityCalendar({
     const f = new Intl.DateTimeFormat(intlLocale, { weekday: "short", timeZone: "UTC" });
     return Array.from({ length: 7 }, (_, i) => f.format(parseDay(addDays("2024-01-01", i)))); // 2024-01-01 is a Monday
   }, [intlLocale]);
+  const weekdayLong = useMemo(() => {
+    const f = new Intl.DateTimeFormat(intlLocale, { weekday: "long", timeZone: "UTC" });
+    return Array.from({ length: 7 }, (_, i) => f.format(parseDay(addDays("2024-01-01", i))));
+  }, [intlLocale]);
+
+  const helpId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
+  // Roving tabindex (WAI-ARIA APG date grid): exactly one day is in the tab order; arrows move it.
+  const [focusDay, setFocusDay] = useState(() => checkIn ?? today);
+  const keyboardMoved = useRef(false);
+  const firstSelectable = today;
 
   const picking = checkIn && !checkOut;
   const checkoutLimit = picking ? nextOccupied(checkIn, occupied, lastDay) : null;
@@ -81,8 +94,55 @@ export function AvailabilityCalendar({
 
   const inRange = (day: string) => checkIn && checkOut && day > checkIn && day < checkOut;
 
+  const minDay = firstMonth;
+  const maxDay = addDays(addMonths(lastMonth, 1), -1);
+  const clampDay = (d: string) => (d < minDay ? minDay : d > maxDay ? maxDay : d);
+
+  // The roving day must be inside the visible months; otherwise the first visible day takes its place.
+  const visibleEnd = addDays(addMonths(month, months), -1);
+  const activeDay = focusDay >= month && focusDay <= visibleEnd ? focusDay : focusDay < firstSelectable && month <= firstSelectable ? firstSelectable : month;
+
+  useEffect(() => {
+    if (!keyboardMoved.current) return;
+    keyboardMoved.current = false;
+    rootRef.current?.querySelector<HTMLButtonElement>(`button[data-day="${focusDay}"]`)?.focus();
+  }, [focusDay, month]);
+
+  function moveFocus(to: string) {
+    const day = clampDay(to);
+    // The second month is hidden on small screens, so only one month counts as visible there.
+    const shown = months > 1 && window.matchMedia("(min-width: 768px)").matches ? months : 1;
+    const target = startOfMonth(day);
+    if (target < month) setMonth(target);
+    else if (target > addMonths(month, shown - 1)) setMonth(addMonths(target, -(shown - 1)));
+    keyboardMoved.current = true;
+    setFocusDay(day);
+  }
+
+  function onGridKeyDown(e: React.KeyboardEvent, day: string) {
+    const isoWeekday = (weekday(day) + 6) % 7; // 0 = Monday
+    const keys: Record<string, () => string> = {
+      ArrowLeft: () => addDays(day, -1),
+      ArrowRight: () => addDays(day, 1),
+      ArrowUp: () => addDays(day, -7),
+      ArrowDown: () => addDays(day, 7),
+      Home: () => addDays(day, -isoWeekday),
+      End: () => addDays(day, 6 - isoWeekday),
+      PageUp: () => shiftMonths(day, e.shiftKey ? -12 : -1),
+      PageDown: () => shiftMonths(day, e.shiftKey ? 12 : 1),
+    };
+    const next = keys[e.key];
+    if (!next) return;
+    e.preventDefault();
+    moveFocus(next());
+  }
+
   return (
-    <div aria-label={labels.calendarLabel} role="group">
+    <div aria-label={labels.calendarLabel} role="group" ref={rootRef}>
+      <p id={helpId} className="sr-only">{labels.calendarHelp}</p>
+      <p className="sr-only" aria-live="polite">
+        {Array.from({ length: months }, (_, i) => monthFmt.format(parseDay(addMonths(month, i)))).join(", ")}
+      </p>
       <div className="mb-4 flex items-center justify-between">
         <button
           type="button"
@@ -91,7 +151,7 @@ export function AvailabilityCalendar({
           disabled={month <= firstMonth}
           aria-label={labels.prevMonth}
         >
-          <ChevronLeft className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5" aria-hidden />
         </button>
         <button
           type="button"
@@ -100,7 +160,7 @@ export function AvailabilityCalendar({
           disabled={addMonths(month, months - 1) >= lastMonth}
           aria-label={labels.nextMonth}
         >
-          <ChevronRight className="h-5 w-5" />
+          <ChevronRight className="h-5 w-5" aria-hidden />
         </button>
       </div>
 
@@ -108,59 +168,83 @@ export function AvailabilityCalendar({
         {Array.from({ length: months }, (_, i) => addMonths(month, i)).map((m, mi) => {
           const offset = (weekday(m) + 6) % 7; // Monday-first grid
           const total = daysInMonth(m);
+          const cells: (string | null)[] = [
+            ...Array.from({ length: offset }, () => null),
+            ...Array.from({ length: total }, (_, d) => addDays(m, d)),
+          ];
+          while (cells.length % 7) cells.push(null);
+          const weeks = Array.from({ length: cells.length / 7 }, (_, w) => cells.slice(w * 7, w * 7 + 7));
+          const headingId = `${helpId}-m${mi}`;
           return (
             <div key={m} className={cn(mi > 0 && "hidden md:block")}>
-              <h3 className="mb-3 text-center font-sans text-base font-semibold capitalize text-sea-900" aria-live="polite">
+              <h3 id={headingId} className="mb-3 text-center font-sans text-base font-semibold text-sea-900 first-letter:uppercase">
                 {monthFmt.format(parseDay(m))}
               </h3>
-              <div className="grid grid-cols-7 text-center text-xs font-medium uppercase text-ink-soft" aria-hidden>
-                {weekdayNames.map((w) => (
-                  <div key={w} className="py-1">{w}</div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-y-1">
-                {Array.from({ length: offset }, (_, k) => (
-                  <div key={`pad-${k}`} />
-                ))}
-                {Array.from({ length: total }, (_, d) => {
-                  const day = addDays(m, d);
-                  const s = dayState(day);
-                  const isStart = day === checkIn;
-                  const isEnd = day === checkOut;
-                  const between = inRange(day);
-                  const status = isStart || isEnd ? labels.selected : s.isOccupied ? labels.unavailable : s.past ? "" : labels.available;
-                  return (
-                    <div
-                      key={day}
-                      className={cn(
-                        "flex justify-center",
-                        between && "bg-sea-100",
-                        isStart && checkOut && "rounded-l-full bg-sea-100",
-                        isEnd && "rounded-r-full bg-sea-100",
-                      )}
-                    >
-                      <button
-                        type="button"
-                        data-day={day}
-                        onClick={() => select(day)}
-                        disabled={!s.selectable}
-                        aria-pressed={isStart || isEnd}
-                        aria-label={`${dayFmt.format(parseDay(day))}${status ? `, ${status}` : ""}`}
-                        className={cn(
-                          "relative grid h-10 w-10 place-items-center rounded-full text-sm transition-colors sm:h-11 sm:w-11",
-                          s.selectable && "hover:bg-sea-200 font-medium text-sea-900",
-                          !s.selectable && "cursor-not-allowed text-ink-soft/60",
-                          s.isOccupied && !s.past && "bg-sand-200 line-through decoration-ink-soft/70",
-                          picking && s.validCheckout && "text-sea-900",
-                          (isStart || isEnd) && "bg-sea-700 font-semibold text-white hover:bg-sea-800",
-                          day === today && !(isStart || isEnd) && "ring-1 ring-inset ring-clay-500",
-                        )}
-                      >
-                        {d + 1}
-                      </button>
+              <div role="grid" aria-labelledby={headingId} aria-describedby={helpId}>
+                <div role="row" className="grid grid-cols-7 text-center text-xs font-medium uppercase text-ink-soft">
+                  {weekdayNames.map((w, wi) => (
+                    <div key={w} role="columnheader" className="py-1">
+                      <abbr title={weekdayLong[wi]} className="no-underline">{w}</abbr>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
+                {weeks.map((week, wi) => (
+                  <div key={wi} role="row" className="mt-1 grid grid-cols-7">
+                    {week.map((day, ci) => {
+                      if (!day) return <div key={`pad-${ci}`} role="gridcell" />;
+                      const s = dayState(day);
+                      const isStart = day === checkIn;
+                      const isEnd = day === checkOut;
+                      const between = inRange(day);
+                      const status = isStart || isEnd
+                        ? labels.selected
+                        : s.past
+                          ? labels.pastDay
+                          : s.isOccupied
+                            ? labels.unavailable
+                            : s.selectable
+                              ? labels.available
+                              : labels.unavailable;
+                      return (
+                        <div
+                          key={day}
+                          role="gridcell"
+                          aria-selected={isStart || isEnd || Boolean(between)}
+                          className={cn(
+                            "flex justify-center",
+                            between && "bg-sea-100",
+                            isStart && checkOut && "rounded-l-full bg-sea-100",
+                            isEnd && "rounded-r-full bg-sea-100",
+                          )}
+                        >
+                          <button
+                            type="button"
+                            data-day={day}
+                            tabIndex={day === activeDay ? 0 : -1}
+                            onClick={() => {
+                              setFocusDay(day);
+                              select(day);
+                            }}
+                            onKeyDown={(e) => onGridKeyDown(e, day)}
+                            aria-disabled={!s.selectable || undefined}
+                            aria-label={`${dayFmt.format(parseDay(day))}, ${status}`}
+                            className={cn(
+                              "relative grid h-10 w-10 place-items-center rounded-full text-sm transition-colors sm:h-11 sm:w-11",
+                              s.selectable && "font-medium text-sea-900 hover:bg-sea-200",
+                              !s.selectable && "cursor-not-allowed text-ink-soft/60",
+                              s.isOccupied && !s.past && "bg-sand-200 line-through decoration-ink-soft/70",
+                              picking && s.validCheckout && "text-sea-900",
+                              (isStart || isEnd) && "bg-sea-700 font-semibold text-white hover:bg-sea-800",
+                              day === today && !(isStart || isEnd) && "ring-1 ring-inset ring-clay-500",
+                            )}
+                          >
+                            {Number(day.slice(8))}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
             </div>
           );
@@ -174,4 +258,11 @@ export function AvailabilityCalendar({
       </div>
     </div>
   );
+}
+
+/** Same day-of-month `n` months away, clamped to that month's length (31 Jan + 1 month → 28/29 Feb). */
+function shiftMonths(day: string, n: number): string {
+  const target = addMonths(startOfMonth(day), n);
+  const dom = Math.min(Number(day.slice(8)), daysInMonth(target));
+  return addDays(target, dom - 1);
 }

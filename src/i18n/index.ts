@@ -3,7 +3,6 @@ import en from "./en";
 import type { Locale, Localized } from "@/lib/types";
 
 export const LOCALES: Locale[] = ["bg", "en"];
-export const DEFAULT_LOCALE: Locale = "bg";
 
 const dictionaries: Record<Locale, Dictionary> = { bg, en };
 

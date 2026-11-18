@@ -1,4 +1,4 @@
-import { deleteMediaItem, moveMedia, updateMediaItem } from "@/app/admin/actions";
+import { deleteMediaItem, moveMedia, updateMediaItem } from "@/app/admin/actions/media";
 import { MediaUploader } from "@/components/admin/media-uploader";
 import { ActionButton, AdminForm } from "@/components/admin/form-kit";
 import { PageHeader, Panel } from "@/components/admin/ui";

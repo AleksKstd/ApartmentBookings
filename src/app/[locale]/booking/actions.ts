@@ -4,7 +4,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isLocale } from "@/i18n";
 import { BookingError, createGuestBooking, problemMessage } from "@/lib/booking-service";
-import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { getRepository } from "@/lib/data";
+import { clientIp, sharedRateLimit } from "@/lib/rate-limit";
 import { bookingRequestSchema } from "@/lib/validation";
 
 export interface BookingFormState {
@@ -14,12 +15,17 @@ export interface BookingFormState {
   values?: { guestName: string; guestEmail: string; guestPhone: string; guestNote: string };
 }
 
-const FIELD_CODES: Record<string, keyof NonNullable<BookingFormState["fieldErrors"]>> = {
-  guestName: "guestName",
-  guestEmail: "guestEmail",
-  guestPhone: "guestPhone",
-  acceptTerms: "acceptTerms",
+type FieldName = keyof NonNullable<BookingFormState["fieldErrors"]>;
+
+/** Form field → the i18n error code shown under it (see booking.errors in the dictionaries). */
+const FIELD_ERROR_CODES: Record<FieldName, "name" | "email" | "phone" | "terms"> = {
+  guestName: "name",
+  guestEmail: "email",
+  guestPhone: "phone",
+  acceptTerms: "terms",
 };
+
+const isFieldName = (key: string): key is FieldName => key in FIELD_ERROR_CODES;
 
 export async function submitBooking(_prev: BookingFormState, formData: FormData): Promise<BookingFormState> {
   const values = {
@@ -31,7 +37,7 @@ export async function submitBooking(_prev: BookingFormState, formData: FormData)
   const rawLocale = formData.get("locale");
   const locale = isLocale(rawLocale) ? rawLocale : "bg";
 
-  if (!rateLimit(`booking:${clientIp(await headers())}`, 8, 10 * 60_000)) {
+  if (!(await sharedRateLimit(getRepository(), `booking:${clientIp(await headers())}`, 8, 10 * 60_000))) {
     return { error: problemMessage(locale, "rate_limited"), values };
   }
 
@@ -51,8 +57,8 @@ export async function submitBooking(_prev: BookingFormState, formData: FormData)
   if (!parsed.success) {
     const fieldErrors: BookingFormState["fieldErrors"] = {};
     for (const issue of parsed.error.issues) {
-      const field = FIELD_CODES[String(issue.path[0])];
-      if (field) fieldErrors[field] = problemMessage(locale, issue.message === "terms" ? "terms" : field.replace("guest", "").toLowerCase());
+      const field = String(issue.path[0]);
+      if (isFieldName(field) && !fieldErrors[field]) fieldErrors[field] = problemMessage(locale, FIELD_ERROR_CODES[field]);
     }
     const datesInvalid = parsed.error.issues.some((i) => ["checkIn", "checkOut", "guests"].includes(String(i.path[0])));
     return {

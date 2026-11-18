@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { cancelBooking, confirmBooking, markBookingPaid, resendGuestEmail, saveAdminNote } from "@/app/admin/actions";
+import { cancelBooking, confirmBooking, markBookingPaid, resendGuestEmail, saveAdminNote } from "@/app/admin/actions/bookings";
 import { ActionButton, AdminForm } from "@/components/admin/form-kit";
 import { PageHeader, Panel, PaymentBadge, StatusBadge, money, showDateTime, showDay } from "@/components/admin/ui";
 import { getRepository } from "@/lib/data";
-import { siteUrl } from "@/lib/site-url";
+import { confirmationPath, siteUrl } from "@/lib/site-url";
 
 const LINE_LABELS: Record<string, string> = {
   nights: "Нощувки",
@@ -19,7 +19,7 @@ export default async function BookingDetailPage({ params }: PageProps<"/admin/bo
   const booking = await getRepository().getBooking(id);
   if (!booking) notFound();
   const q = booking.priceBreakdown;
-  const guestLink = `${siteUrl()}/${booking.locale}/booking/confirmation/${booking.reference}?t=${booking.accessToken}`;
+  const guestLink = `${siteUrl()}${confirmationPath(booking)}`;
 
   return (
     <>
@@ -77,14 +77,14 @@ export default async function BookingDetailPage({ params }: PageProps<"/admin/bo
           <Panel title="Действия">
             <div className="flex flex-wrap gap-2">
               {booking.status !== "confirmed" && booking.status !== "cancelled" && (
-                <ActionButton action={confirmBooking.bind(null, booking.id)} className="btn-secondary">Потвърди</ActionButton>
+                <ActionButton action={confirmBooking.bind(null, booking.id)} className="btn-secondary" showSuccess>Потвърди</ActionButton>
               )}
               {booking.paymentStatus !== "paid" && booking.status !== "cancelled" && (
-                <ActionButton action={markBookingPaid.bind(null, booking.id)} confirm="Да отбележа ли резервацията като платена (напр. в брой или по банка)?">
+                <ActionButton action={markBookingPaid.bind(null, booking.id)} showSuccess confirm="Да отбележа ли резервацията като платена (напр. в брой или по банка)?">
                   Отбележи като платена
                 </ActionButton>
               )}
-              <ActionButton action={resendGuestEmail.bind(null, booking.id)}>Изпрати имейл отново</ActionButton>
+              <ActionButton action={resendGuestEmail.bind(null, booking.id)} showSuccess>Изпрати имейл отново</ActionButton>
             </div>
             <p className="mt-4 break-all text-xs text-ink-muted">Линк за госта: <a className="text-sea-700 underline" href={guestLink} target="_blank" rel="noreferrer">{guestLink}</a></p>
           </Panel>

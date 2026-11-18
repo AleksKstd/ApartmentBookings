@@ -6,6 +6,7 @@ import { Facts } from "@/components/site/facts";
 import { Gallery } from "@/components/site/gallery";
 import { HeroCarousel } from "@/components/site/hero-carousel";
 import { SectionHeading } from "@/components/site/section-heading";
+import { StructuredData } from "@/components/site/structured-data";
 import { getDictionary, isLocale, pick } from "@/i18n";
 import { formatMoney } from "@/lib/pricing";
 import { getSiteData } from "@/lib/site";
@@ -19,6 +20,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
   return (
     <>
+      <StructuredData locale={locale} property={property} pricing={pricing} photos={gallery} lowestNightly={lowestNightly} />
       <HeroCarousel
         slides={slides}
         title={pick(homepage.heroTitle, locale)}
@@ -103,6 +105,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             {property.mapUrl && (
               <a href={property.mapUrl} target="_blank" rel="noopener noreferrer" className="btn-outline mt-6">
                 {t.common.openMap}
+                <span className="sr-only"> {t.common.opensNewTab}</span>
               </a>
             )}
           </div>

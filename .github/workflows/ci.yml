@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+        env:
+          DEMO_MODE: "true"
+          ADMIN_SESSION_SECRET: ci-only-session-secret-that-is-long-enough
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e -- --trace off
+
+  database:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v5
+      - name: Apply migrations and run database checks
+        run: |
+          createdb ab_test
+          psql -v ON_ERROR_STOP=1 -q -d ab_test -f supabase/tests/00_supabase_stub.sql
+          for f in supabase/migrations/*.sql; do psql -v ON_ERROR_STOP=1 -q -d ab_test -f "$f"; done
+          psql -d ab_test -f supabase/tests/10_constraints.sql > constraints.log 2>&1
+          psql -d ab_test -f supabase/tests/20_calendar_integrity.sql > integrity.log 2>&1
+          cat constraints.log integrity.log
+          test "$(grep -c 'bookings_no_overlap' constraints.log)" -eq 2
+          grep -q 'dates overlap a blocked range' integrity.log
+          grep -q 'blocked range overlaps an active booking' integrity.log
+          grep -q 'permission denied for function hit_rate_limit' integrity.log
+          grep -Eq '^ *t *\| *t *\| *t *\| *f *$' integrity.log
+          grep -q 'Payment hold expired' integrity.log
+          grep -q 'keep me' integrity.log

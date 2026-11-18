@@ -29,7 +29,7 @@ export function Footer({ locale, t, property }: { locale: Locale; t: Dictionary;
             </a>
           </li>
         </ul>
-        <nav aria-label="Footer" className="flex flex-col gap-2 text-sm">
+        <nav aria-label={t.nav.footerNavLabel} className="flex flex-col gap-2 text-sm">
           <Link href={`/${locale}/apartment`} className="hover:text-white">{t.nav.apartment}</Link>
           <Link href={`/${locale}/gallery`} className="hover:text-white">{t.nav.gallery}</Link>
           <Link href={`/${locale}/booking`} className="hover:text-white">{t.nav.booking}</Link>
