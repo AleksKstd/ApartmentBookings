@@ -32,7 +32,7 @@ To reset the demo data, delete the `.demo-data/` folder.
 | `npm run lint` | ESLint |
 | `npm run typecheck` | Generates Next.js route types, then runs TypeScript |
 | `npm test` | Unit tests (Vitest): pricing, availability, iCal, auth, i18n, validation, booking/Stripe lifecycle |
-| `npm run test:e2e` | End-to-end tests (Playwright) against a production build in demo mode. Run `npm run build` first |
+| `npm run test:e2e` | End-to-end tests (Playwright) against a production build in demo mode. Run `npm run build` first; install the browser once with `npx playwright install chromium` (or point `PLAYWRIGHT_CHROMIUM_PATH` at an existing Chromium) |
 | `npm run hash-password -- "passphrase"` | Generates `ADMIN_PASSWORD_HASH` |
 | `npm run generate-secrets` | Generates `ADMIN_SESSION_SECRET`, `ICAL_EXPORT_TOKEN` and `CRON_SECRET` |
 

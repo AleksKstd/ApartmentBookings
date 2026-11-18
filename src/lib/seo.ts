@@ -27,6 +27,8 @@ export function pageMetadata(locale: Locale, path: string, title: string | undef
       locale: locale === "bg" ? "bg_BG" : "en_GB",
       alternateLocale: locale === "bg" ? "en_GB" : "bg_BG",
       type: "website",
+      // Set explicitly: a page-level openGraph object replaces the parent's, including the generated image.
+      images: [{ url: `/${locale}/opengraph-image`, width: 1200, height: 630 }],
       ...(title ? { title } : {}),
       ...(description ? { description } : {}),
     },
