@@ -30,7 +30,7 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
         <ul className="mt-10 grid gap-4">
           {items.map(({ icon: Icon, label, value, href }) => (
             <li key={label} className="card flex items-center gap-4 p-5">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-sea-50 text-sea-700">
+              <span className="grid h-12 w-12 shrink-0 place-items-center border border-ink/15 text-clay-600">
                 <Icon className="h-5 w-5" aria-hidden />
               </span>
               <div className="min-w-0">

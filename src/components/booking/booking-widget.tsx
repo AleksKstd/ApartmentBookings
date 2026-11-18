@@ -92,7 +92,7 @@ export function BookingWidget(props: Props) {
     <div className={cn("grid gap-8 lg:grid-cols-[1.35fr_1fr] lg:items-start", ready && "pb-20 lg:pb-0")}>
       <div className="card p-5 sm:p-7">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 font-sans text-lg font-semibold">
+          <h2 className="flex items-center gap-2 text-2xl">
             <CalendarDays className="h-5 w-5 text-clay-500" aria-hidden />
             {checkIn && checkOut ? t.booking.datesSelected : checkIn ? t.booking.selectCheckOut : t.booking.selectDates}
           </h2>
@@ -123,7 +123,7 @@ export function BookingWidget(props: Props) {
 
       <div className="space-y-6 lg:sticky lg:top-24">
         <section className="card p-5 sm:p-7" aria-labelledby="summary-title">
-          <h2 id="summary-title" className="font-sans text-lg font-semibold">{t.booking.summaryTitle}</h2>
+          <h2 id="summary-title" className="text-2xl">{t.booking.summaryTitle}</h2>
           <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
             <div className="rounded-xl bg-sand-100 p-3">
               <dt className="text-ink-muted">{t.common.checkIn}</dt>
@@ -197,7 +197,7 @@ export function BookingWidget(props: Props) {
           aria-labelledby="details-title"
           noValidate
         >
-          <h2 id="details-title" className="!mt-0 font-sans text-lg font-semibold">{t.booking.yourDetails}</h2>
+          <h2 id="details-title" className="!mt-0 text-2xl">{t.booking.yourDetails}</h2>
           <input type="hidden" name="checkIn" value={checkIn ?? ""} />
           <input type="hidden" name="checkOut" value={checkOut ?? ""} />
           <input type="hidden" name="guests" value={guests} />

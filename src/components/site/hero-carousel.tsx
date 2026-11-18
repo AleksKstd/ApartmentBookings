@@ -55,7 +55,7 @@ export function HeroCarousel({
 
   return (
     <section
-      className="relative isolate h-[78svh] min-h-[480px] overflow-hidden bg-sea-900"
+      className="relative isolate h-[82svh] min-h-[560px] overflow-hidden bg-sea-900"
       aria-roledescription="carousel"
       aria-label={t.label}
       onMouseEnter={() => setHovered(true)}
@@ -93,17 +93,18 @@ export function HeroCarousel({
           />
         </div>
       ))}
-      <div className="absolute inset-0 bg-gradient-to-t from-sea-900/85 via-sea-900/30 to-sea-900/10" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/0" aria-hidden />
+      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/30 to-transparent" aria-hidden />
 
-      <div className="container relative flex h-full flex-col justify-end pb-20 sm:pb-24">
-        <div className="max-w-2xl animate-rise-in">
-          <h1 className="text-4xl font-semibold leading-tight text-white sm:text-6xl">{title}</h1>
-          <p className="mt-4 text-lg text-sea-50/90 sm:text-xl">{subtitle}</p>
+      <div className="container relative flex h-full flex-col justify-end pb-32 sm:pb-36">
+        <div className="max-w-3xl animate-rise-in">
+          <h1 className="text-[2.75rem] leading-[1.02] text-white sm:text-7xl lg:text-[5.5rem]">{title}</h1>
+          <p className="mt-5 max-w-xl text-lg text-white/85 sm:text-xl">{subtitle}</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href={primaryCta.href} className="btn-primary px-6 py-3 text-base">
+            <Link href={primaryCta.href} className="btn-primary px-6 py-4">
               {primaryCta.label}
             </Link>
-            <Link href={secondaryCta.href} className="btn border border-white/40 px-6 py-3 text-base text-white hover:bg-white/10">
+            <Link href={secondaryCta.href} className="btn border border-white/70 px-6 py-4 text-white hover:bg-white hover:text-ink">
               {secondaryCta.label}
             </Link>
           </div>
@@ -111,8 +112,8 @@ export function HeroCarousel({
       </div>
 
       {count > 1 && (
-        <div className="absolute inset-x-0 bottom-5 z-10">
-          <div className="container flex items-center justify-between gap-4">
+        <div className="absolute inset-x-0 bottom-16 z-10 sm:bottom-20">
+          <div className="container flex items-center justify-end gap-6">
             <div className="flex items-center gap-2">
               {slides.map((s, i) => (
                 <button
@@ -121,7 +122,7 @@ export function HeroCarousel({
                   onClick={() => go(i)}
                   aria-label={fmt(t.slide, { n: i + 1, total: count })}
                   aria-current={i === index}
-                  className={cn("h-2 rounded-full bg-white/50 transition-all", i === index ? "w-8 bg-white" : "w-2 hover:bg-white/80")}
+                  className={cn("h-0.5 bg-white/40 transition-all", i === index ? "w-10 bg-white" : "w-5 hover:bg-white/80")}
                 />
               ))}
             </div>

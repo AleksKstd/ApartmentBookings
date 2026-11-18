@@ -177,7 +177,7 @@ export function AvailabilityCalendar({
           const headingId = `${helpId}-m${mi}`;
           return (
             <div key={m} className={cn(mi > 0 && "hidden md:block")}>
-              <h3 id={headingId} className="mb-3 text-center font-sans text-base font-semibold text-sea-900 first-letter:uppercase">
+              <h3 id={headingId} className="mb-3 text-center font-serif text-lg text-ink first-letter:uppercase">
                 {monthFmt.format(parseDay(m))}
               </h3>
               <div role="grid" aria-labelledby={headingId} aria-describedby={helpId}>
@@ -229,12 +229,12 @@ export function AvailabilityCalendar({
                             aria-disabled={!s.selectable || undefined}
                             aria-label={`${dayFmt.format(parseDay(day))}, ${status}`}
                             className={cn(
-                              "relative grid h-10 w-10 place-items-center rounded-full text-sm transition-colors sm:h-11 sm:w-11",
+                              "relative grid h-10 w-10 place-items-center rounded-sm text-sm transition-colors sm:h-11 sm:w-11",
                               s.selectable && "font-medium text-sea-900 hover:bg-sea-200",
                               !s.selectable && "cursor-not-allowed text-ink-soft/60",
                               s.isOccupied && !s.past && "bg-sand-200 line-through decoration-ink-soft/70",
                               picking && s.validCheckout && "text-sea-900",
-                              (isStart || isEnd) && "bg-sea-700 font-semibold text-white hover:bg-sea-800",
+                              (isStart || isEnd) && "bg-ink font-semibold text-white hover:bg-ink",
                               day === today && !(isStart || isEnd) && "ring-1 ring-inset ring-clay-500",
                             )}
                           >
@@ -252,9 +252,9 @@ export function AvailabilityCalendar({
       </div>
 
       <div className="mt-5 flex flex-wrap gap-4 text-xs text-ink-muted" aria-hidden>
-        <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full border border-sea-200 bg-white" />{labels.available}</span>
-        <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-sand-300" />{labels.unavailable}</span>
-        <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-sea-700" />{labels.selected}</span>
+        <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm border border-sea-200 bg-white" />{labels.available}</span>
+        <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-sand-300" />{labels.unavailable}</span>
+        <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm bg-ink" />{labels.selected}</span>
       </div>
     </div>
   );

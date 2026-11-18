@@ -3,20 +3,24 @@ import type { Config } from "tailwindcss";
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
-    container: { center: true, padding: { DEFAULT: "1rem", sm: "1.5rem", lg: "2rem" }, screens: { "2xl": "1200px" } },
+    container: { center: true, padding: { DEFAULT: "1.25rem", sm: "1.5rem", lg: "2.5rem" }, screens: { "2xl": "1280px" } },
     extend: {
+      // Sharper palette: near-black ink, warm paper, a deep pine "sea" and one burnt-orange accent.
       colors: {
-        sea: { 50: "#eef6f7", 100: "#d5e8ec", 200: "#a9d0d8", 500: "#2f7184", 600: "#235f71", 700: "#1d4e5f", 800: "#173e4b", 900: "#102c35" },
-        sand: { 50: "#fbf9f5", 100: "#f6f3ee", 200: "#ece5d8", 300: "#dccfb8" },
-        clay: { 400: "#d9896a", 500: "#c9714b", 600: "#a14f2c", 700: "#843f22" },
-        ink: { DEFAULT: "#1f2a2e", muted: "#5b6b70", soft: "#626f75" },
+        sea: { 50: "#eef3f2", 100: "#d3e1df", 200: "#a7c3bf", 500: "#2b6a64", 600: "#1f5852", 700: "#174641", 800: "#113632", 900: "#0b2422" },
+        sand: { 50: "#f7f5f0", 100: "#efebe3", 200: "#e2dccf", 300: "#cfc6b3" },
+        clay: { 400: "#e08a5f", 500: "#c25a2a", 600: "#a5461a", 700: "#873813" },
+        ink: { DEFAULT: "#14181a", muted: "#4d5559", soft: "#5f676b" },
       },
       fontFamily: {
-        sans: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
-        serif: ["Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", "Cambria", "Times New Roman", "serif"],
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Arial", "sans-serif"],
+        serif: ["var(--font-display)", "Iowan Old Style", "Palatino Linotype", "Georgia", "serif"],
       },
+      // Crisp geometry: every rounded-* in the app collapses to a small, consistent radius.
+      borderRadius: { sm: "2px", DEFAULT: "3px", md: "3px", lg: "4px", xl: "4px", "2xl": "4px", "3xl": "6px" },
       boxShadow: {
-        card: "0 1px 2px rgba(16,44,53,.06), 0 8px 24px -12px rgba(16,44,53,.18)",
+        card: "0 1px 0 rgba(11,36,34,.04)",
+        lift: "0 24px 48px -24px rgba(11,36,34,.35)",
       },
       keyframes: {
         "fade-in": { from: { opacity: "0" }, to: { opacity: "1" } },
