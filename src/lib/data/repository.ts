@@ -94,6 +94,9 @@ export interface Repository extends RateLimitStore {
   updateFeedStatus(id: string, patch: Pick<CalendarFeed, "lastSyncedAt" | "lastError" | "lastEventCount">): Promise<void>;
   deleteFeed(id: string): Promise<void>;
 
+  /** Supabase only: verifies connection, migrations and storage. */
+  healthCheck?(): Promise<string[]>;
+
   logEmail(email: Omit<OutboxEmail, "id" | "createdAt">): Promise<void>;
   listEmails(limit?: number): Promise<OutboxEmail[]>;
 }

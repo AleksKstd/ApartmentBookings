@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { CalendarDays, FileText, Images, Inbox, LayoutDashboard, LogOut, Mail, Menu, RefreshCw, Tag, X } from "lucide-react";
+import { CalendarDays, FileText, Images, Inbox, LayoutDashboard, LogOut, Mail, Menu, PlugZap, RefreshCw, Tag, X } from "lucide-react";
 import { logout } from "@/app/admin/actions/auth";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ const LINKS = [
   { href: "/admin/content", label: "Съдържание", icon: FileText },
   { href: "/admin/sync", label: "Синхронизация", icon: RefreshCw },
   { href: "/admin/emails", label: "Имейли", icon: Mail },
+  { href: "/admin/integrations", label: "Интеграции", icon: PlugZap },
 ];
 
 export function AdminSidebar({ siteName, pendingCount, demo }: { siteName: string; pendingCount: number; demo: boolean }) {

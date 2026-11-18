@@ -62,12 +62,15 @@ export function ActionButton({
   confirm,
   className = "btn-outline",
   title,
+  showSuccess = false,
 }: {
   action: () => Promise<ActionResult>;
   children: React.ReactNode;
   confirm?: string;
   className?: string;
   title?: string;
+  /** Also show the message when the action succeeds (e.g. connection tests). */
+  showSuccess?: boolean;
 }) {
   const [pending, start] = useTransition();
   const [result, setResult] = useState<ActionResult | null>(null);
@@ -87,7 +90,7 @@ export function ActionButton({
         {pending && <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />}
         {children}
       </button>
-      {result && !result.ok && <ResultMessage result={result} />}
+      {result && (!result.ok || showSuccess) && <ResultMessage result={result} />}
     </span>
   );
 }

@@ -325,6 +325,20 @@ export class SupabaseRepository implements Repository {
     return row ? toBooking(row) : null;
   }
 
+  /** Connection test for Admin → Интеграции: returns human-readable problems (empty = healthy). */
+  async healthCheck(): Promise<string[]> {
+    const problems: string[] = [];
+    const settings = await this.db.from("site_settings").select("key");
+    if (settings.error) return [`Няма връзка с базата или таблиците липсват: ${settings.error.message}`];
+    if ((settings.data ?? []).length < 3) problems.push("Началното съдържание не е заредено (миграция 20261020000100_starter_content).");
+    const rpc = await this.db.rpc("expire_stale_holds", { p_now: new Date().toISOString() });
+    if (rpc.error) problems.push("Липсва миграция 20261118000000_calendar_integrity — приложете я в Supabase.");
+    const bucket = await this.db.storage.getBucket(MEDIA_BUCKET);
+    if (bucket.error) problems.push(`Липсва хранилище „${MEDIA_BUCKET}“ за снимки: ${bucket.error.message}`);
+    else if (!bucket.data.public) problems.push(`Хранилището „${MEDIA_BUCKET}“ трябва да е публично.`);
+    return problems;
+  }
+
   async hitRateLimit(keyHash: string, limit: number, windowSeconds: number) {
     return Boolean(check(await this.db.rpc("hit_rate_limit", { p_key: keyHash, p_limit: limit, p_window_seconds: windowSeconds })));
   }

@@ -85,7 +85,7 @@ ${paragraphs.map((p) => `<p style="margin:0 0 12px;line-height:1.5">${escapeHtml
 <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:16px 0;border-collapse:collapse">
 ${rows.map(([k, v]) => `<tr><td style="padding:6px 0;color:#5b6b70;border-bottom:1px solid #eee">${escapeHtml(k)}</td><td style="padding:6px 0;text-align:right;border-bottom:1px solid #eee"><strong>${escapeHtml(v)}</strong></td></tr>`).join("")}
 </table>
-${link ? `<p style="margin:24px 0"><a href="${escapeHtml(link.href)}" style="background:#c9714b;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;display:inline-block">${escapeHtml(link.label)}</a></p>` : ""}
+${link ? `<p style="margin:24px 0"><a href="${escapeHtml(link.href)}" style="background:#a14f2c;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;display:inline-block">${escapeHtml(link.label)}</a></p>` : ""}
 <p style="margin:24px 0 0;color:#5b6b70;font-size:13px">${escapeHtml(property.contactEmail)} · ${escapeHtml(property.contactPhone)}</p>
 </td></tr></table></td></tr></table></body></html>`;
   const text = [title, "", ...paragraphs, "", ...rows.map(([k, v]) => `${k}: ${v}`), ...(link ? ["", `${link.label}: ${link.href}`] : [])].join("\n");

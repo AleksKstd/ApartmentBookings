@@ -6,7 +6,8 @@ for the owner.
 - **Public site:** a homepage with a photo carousel, a property overview, a gallery with a lightbox, contact and privacy pages.
 - **Booking:** a live availability calendar, instant server-side pricing, and either Stripe Checkout or "request to book".
 - **Admin (Bulgarian):** dashboard, reservations (confirm, cancel/refund, manual bookings), calendar blocking,
-  pricing and seasons, photo management, homepage/property content editor, iCal sync (Airbnb, Booking.com) and an email log.
+  pricing and seasons, photo management, homepage/property content editor, iCal sync (Booking.com, Airbnb), an email log
+  and an **Integrations** page that shows what is configured and tests Supabase, Stripe and email with one click.
 - **Demo mode:** runs locally with zero credentials. Data is stored in `.demo-data/`, and payments and emails are simulated.
 
 ## Quick start (demo mode)
@@ -29,10 +30,14 @@ To reset the demo data, delete the `.demo-data/` folder.
 | `npm run dev` | Development server |
 | `npm run build` / `npm start` | Production build / server |
 | `npm run lint` | ESLint |
-| `npm run typecheck` | TypeScript |
+| `npm run typecheck` | Generates Next.js route types, then runs TypeScript |
 | `npm test` | Unit tests (Vitest): pricing, availability, iCal, auth, i18n, validation, booking/Stripe lifecycle |
 | `npm run test:e2e` | End-to-end tests (Playwright) against a production build in demo mode. Run `npm run build` first |
 | `npm run hash-password -- "passphrase"` | Generates `ADMIN_PASSWORD_HASH` |
+| `npm run generate-secrets` | Generates `ADMIN_SESSION_SECRET`, `ICAL_EXPORT_TOKEN` and `CRON_SECRET` |
+
+CI (`.github/workflows/ci.yml`) runs lint, typecheck, unit tests, the build, the e2e suite and the SQL
+database checks on every pull request.
 
 ## Tech stack
 
@@ -45,7 +50,8 @@ Checkout, Resend (HTTP API), Zod, Vitest, Playwright.
 src/
   app/[locale]/…           public pages (bg, en)
   app/admin/(auth)/login   admin login
-  app/admin/(panel)/…      admin pages; app/admin/actions.ts = all admin server actions
+  app/admin/(panel)/…      admin pages
+  app/admin/actions/…      admin server actions, one file per area (bookings, calendar, pricing, media, content, integrations)
   app/api/…                quote, Stripe webhook, iCal export, cron sync, demo media
   components/{site,booking,admin}
   i18n/{bg,en}.ts          dictionaries (en must match bg's keys — enforced by TS and tests)
@@ -54,10 +60,12 @@ src/
   lib/booking-service.ts   booking creation, Stripe Checkout, payment reconciliation
   lib/data/                repository interface + Supabase and demo implementations
   lib/ical.ts              iCal parser/generator; lib/calendar-sync.ts imports feeds
-  proxy.ts                 locale redirects + admin session check
+  lib/net-guard.ts         SSRF-safe fetch for admin-supplied URLs (calendar feeds)
+  lib/integrations.ts      readiness report behind Admin → Интеграции
+  proxy.ts                 locale redirects, admin session check, per-request nonce CSP
 supabase/config.toml       Supabase CLI / GitHub integration config
 supabase/migrations        SQL schema (RLS, double-booking exclusion constraint) + starter content
-supabase/tests             SQL checks for the constraints
+supabase/tests             SQL checks for the constraints, calendar triggers and rate limiting
 tests/unit, tests/e2e
 ```
 

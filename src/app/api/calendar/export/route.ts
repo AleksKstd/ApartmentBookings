@@ -7,8 +7,12 @@ import { siteUrl } from "@/lib/site-url";
 import { tokenMatches } from "@/lib/tokens";
 
 /**
- * iCal export for Airbnb / Booking.com: `/api/calendar/export?token=…`.
- * Contains only dates (no guest data). Imported feeds are NOT re-exported to avoid sync loops.
+ * iCal export for Booking.com, Airbnb and others: `/api/calendar/export?token=…` (also served as
+ * `/api/calendar/availability.ics`). Contains only dates, never guest data.
+ *
+ * `&for=<feedId>` gives one platform its own feed: it also contains the dates imported from every
+ * OTHER platform (so an Airbnb booking blocks Booking.com), but never that platform's own dates back
+ * — echoing them would create a sync loop that keeps cancelled reservations blocked.
  */
 export async function GET(request: NextRequest) {
   const expected = process.env.ICAL_EXPORT_TOKEN;
@@ -18,6 +22,9 @@ export async function GET(request: NextRequest) {
   if (!tokenMatches(request.nextUrl.searchParams.get("token"), expected)) {
     return new NextResponse("Not found", { status: 404 });
   }
+
+  const forParam = request.nextUrl.searchParams.get("for");
+  const forFeed = forParam && /^[0-9a-f-]{36}$/i.test(forParam) ? forParam : null;
 
   const repo = getRepository();
   const from = addDays(todayAtProperty(), -30);
@@ -32,7 +39,7 @@ export async function GET(request: NextRequest) {
       .filter((b) => bookingBlocksCalendar(b))
       .map((b) => ({ uid: `${b.id}@${host}`, start: b.checkIn, end: b.checkOut, summary: "Reserved" })),
     ...blocked
-      .filter((b) => b.source === "manual" && b.endDate > from)
+      .filter((b) => b.endDate > from && (b.source === "manual" || (forFeed !== null && b.feedId !== null && b.feedId !== forFeed)))
       .map((b) => ({ uid: `${b.id}@${host}`, start: b.startDate, end: b.endDate, summary: "Not available" })),
   ];
 
