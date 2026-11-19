@@ -164,7 +164,7 @@ export function BookingWidget(props: Props) {
             )}
           </div>
           <div className="mb-6 flex flex-wrap items-center gap-3">
-            <label className="flex items-center gap-2 text-sm font-medium text-ink" htmlFor="guests-select">
+            <label className="flex items-center gap-2 text-sm font-semibold text-ink" htmlFor="guests-select">
               <Users className="h-4 w-4 text-clay-500" aria-hidden />
               {t.common.guests}
             </label>
@@ -188,7 +188,7 @@ export function BookingWidget(props: Props) {
             }}
             labels={t.booking}
           />
-          <p className="mt-4 text-sm font-medium text-ink" aria-live="polite">
+          <p className="mt-4 text-sm font-semibold text-ink" aria-live="polite">
             {fmt(t.booking.minStayHint, { n: checkIn ? minNightsFor(checkIn) : props.minNights })}
           </p>
         </div>
@@ -225,7 +225,7 @@ export function BookingWidget(props: Props) {
                         <span className="text-ink-muted">
                           {line.kind === "nights" ? nightsLine(line, quote.quote.nightly) : lineLabel(line.label, line.quantity)}
                         </span>
-                        <span className={cn("font-medium tabular-nums", line.amount < 0 && "text-success-700")}>{money(line.amount)}</span>
+                        <span className={cn("font-semibold tabular-nums", line.amount < 0 && "text-success-700")}>{money(line.amount)}</span>
                       </li>
                     ))}
                   </ul>
@@ -331,7 +331,7 @@ export function BookingWidget(props: Props) {
 
           <div className="space-y-3 rounded-xl bg-sand-100 p-4">
             <details className="text-sm">
-              <summary className="cursor-pointer font-medium text-sea-800">{t.booking.rulesSummary}</summary>
+              <summary className="cursor-pointer font-semibold text-sea-800">{t.booking.rulesSummary}</summary>
               <div className="mt-3 space-y-2 text-ink-muted">
                 <p>{fmt(t.booking.rulesTimes, { in: trust.checkInTime, out: trust.checkOutTime })}</p>
                 {trust.houseRules.length > 0 && (
@@ -373,7 +373,7 @@ export function BookingWidget(props: Props) {
       {quote.status === "ok" && checkIn && checkOut && (
         <div
           className={cn(
-            "fixed inset-x-0 bottom-0 z-30 border-t border-sand-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_-12px_rgba(16,44,53,.25)] backdrop-blur transition-transform duration-300 ease-out lg:hidden",
+            "fixed inset-x-0 bottom-0 z-30 border-t border-sand-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_-12px_rgba(17,31,71,.25)] backdrop-blur transition-transform duration-300 ease-out lg:hidden",
             showBar ? "translate-y-0" : "invisible translate-y-full",
           )}
           aria-hidden={!showBar}

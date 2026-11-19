@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { notFound } from "next/navigation";
 import { AddressPlate } from "@/components/site/address-plate";
 import { AmenityList } from "@/components/site/amenity-list";
@@ -117,7 +118,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               <h2 className="text-4xl text-white sm:text-5xl">{pick(homepage.ctaTitle, locale)}</h2>
               <p className="mt-3 text-lg text-sea-100">{pick(homepage.ctaText, locale)}</p>
               <Link href={`/${locale}/booking`} className="btn mt-8 bg-white px-6 py-3 text-lg text-sea-700 hover:bg-sea-50">
-                {t.common.checkAvailability} <span aria-hidden>→</span>
+                {t.common.checkAvailability} <ArrowRight className="h-5 w-5" aria-hidden />
               </Link>
             </div>
           </div>

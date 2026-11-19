@@ -30,7 +30,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
         {t.nav.skipToContent}
       </a>
       {demo && (
-        <div className="bg-clay-600 px-4 py-1.5 text-center text-xs font-medium text-white" role="note">
+        <div className="bg-clay-600 px-4 py-1.5 text-center text-xs font-semibold text-white" role="note">
           {t.demo.banner}
         </div>
       )}

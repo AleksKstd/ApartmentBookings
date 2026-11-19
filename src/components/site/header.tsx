@@ -109,7 +109,7 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
                   href={l.href}
                   onClick={() => setOpen(false)}
                   aria-current={isActive(l.href) ? "page" : undefined}
-                  className="block rounded-xl px-3 py-3 text-base font-medium text-sea-900 hover:bg-sea-50"
+                  className="block rounded-xl px-3 py-3 text-base font-semibold text-sea-900 hover:bg-sea-50"
                 >
                   {l.label}
                 </Link>

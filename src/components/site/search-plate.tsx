@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ArrowRight } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import { addDays } from "@/lib/dates";
 import type { Locale } from "@/lib/types";
@@ -111,7 +112,7 @@ export function SearchPlate({ locale, t, today, maxGuests }: { locale: Locale; t
             type="submit"
             className="flex h-full min-h-14 w-full items-center justify-center rounded-md bg-white px-6 font-display text-xl font-extrabold text-sea-700 transition-colors hover:bg-sea-50"
           >
-            {t.common.checkAvailability} <span aria-hidden className="ml-2">→</span>
+            {t.common.checkAvailability} <ArrowRight className="ml-1.5 h-5 w-5" aria-hidden />
           </button>
         </div>
       </div>

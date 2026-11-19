@@ -184,7 +184,7 @@ export function AvailabilityCalendar({
                 {monthFmt.format(parseDay(m))}
               </h3>
               <div role="grid" aria-labelledby={headingId} className="space-y-1">
-                <div role="row" className="grid grid-cols-7 text-center text-xs font-medium uppercase text-ink-muted">
+                <div role="row" className="grid grid-cols-7 text-center text-xs font-semibold uppercase text-ink-muted">
                   {weekdayNames.map((w) => (
                     <div key={w.long} role="columnheader" aria-label={w.long} className="py-1">{w.short}</div>
                   ))}
@@ -221,7 +221,7 @@ export function AvailabilityCalendar({
                             aria-label={`${dayFmt.format(parseDay(day))}${status ? `, ${status}` : ""}`}
                             className={cn(
                               "relative grid h-10 w-10 place-items-center rounded-full text-sm transition-colors sm:h-11 sm:w-11",
-                              s.selectable && "font-medium text-sea-900 hover:bg-sea-200",
+                              s.selectable && "font-semibold text-sea-900 hover:bg-sea-200",
                               !s.selectable && "cursor-not-allowed text-ink-soft/60",
                               s.isOccupied && !s.past && "bg-sand-200 line-through decoration-ink-soft/70",
                               picking && s.validCheckout && "text-sea-900",

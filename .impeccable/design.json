@@ -1,0 +1,650 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-19T14:22:59.571Z",
+  "title": "Design System: Morski Briz Apartment",
+  "extensions": {
+    "colorMeta": {
+      "enamel-cobalt": {
+        "role": "primary",
+        "displayName": "Enamel Cobalt",
+        "canonical": "#1f3c88",
+        "oklch": "oklch(38.2% 0.132 264.9)",
+        "tonalRamp": [
+          "#111f47",
+          "#182f6b",
+          "#1f3c88",
+          "#26479a",
+          "#3456a8",
+          "#b7c6ea",
+          "#dbe3f5",
+          "#eef2fb"
+        ],
+        "scaleSource": "tailwind sea-900..50"
+      },
+      "enamel-cobalt-deep": {
+        "role": "primary",
+        "displayName": "Deep Enamel",
+        "canonical": "#182f6b",
+        "oklch": "oklch(32.6% 0.109 265.0)",
+        "tonalRamp": [
+          "#111f47",
+          "#182f6b",
+          "#1f3c88",
+          "#26479a",
+          "#3456a8",
+          "#b7c6ea",
+          "#dbe3f5",
+          "#eef2fb"
+        ],
+        "scaleSource": "tailwind sea-900..50"
+      },
+      "night-cobalt": {
+        "role": "primary",
+        "displayName": "Night Cobalt",
+        "canonical": "#111f47",
+        "oklch": "oklch(25.3% 0.077 266.4)",
+        "tonalRamp": [
+          "#111f47",
+          "#182f6b",
+          "#1f3c88",
+          "#26479a",
+          "#3456a8",
+          "#b7c6ea",
+          "#dbe3f5",
+          "#eef2fb"
+        ],
+        "scaleSource": "tailwind sea-900..50"
+      },
+      "signal-cobalt": {
+        "role": "primary",
+        "displayName": "Signal Cobalt",
+        "canonical": "#3456a8",
+        "oklch": "oklch(47.3% 0.138 264.7)",
+        "tonalRamp": [
+          "#111f47",
+          "#182f6b",
+          "#1f3c88",
+          "#26479a",
+          "#3456a8",
+          "#b7c6ea",
+          "#dbe3f5",
+          "#eef2fb"
+        ],
+        "scaleSource": "tailwind sea-900..50"
+      },
+      "icon-cobalt": {
+        "role": "primary",
+        "displayName": "Icon Cobalt",
+        "canonical": "#26479a",
+        "oklch": "oklch(42.4% 0.141 264.7)",
+        "tonalRamp": [
+          "#111f47",
+          "#182f6b",
+          "#1f3c88",
+          "#26479a",
+          "#3456a8",
+          "#b7c6ea",
+          "#dbe3f5",
+          "#eef2fb"
+        ],
+        "scaleSource": "tailwind sea-900..50"
+      },
+      "enamel-tint": {
+        "role": "secondary",
+        "displayName": "Enamel Tint",
+        "canonical": "#dbe3f5",
+        "oklch": "oklch(91.5% 0.026 266.6)",
+        "tonalRamp": [
+          "#111f47",
+          "#182f6b",
+          "#1f3c88",
+          "#26479a",
+          "#3456a8",
+          "#b7c6ea",
+          "#dbe3f5",
+          "#eef2fb"
+        ],
+        "scaleSource": "tailwind sea-900..50"
+      },
+      "enamel-haze": {
+        "role": "secondary",
+        "displayName": "Enamel Haze",
+        "canonical": "#b7c6ea",
+        "oklch": "oklch(82.7% 0.053 267.4)",
+        "tonalRamp": [
+          "#111f47",
+          "#182f6b",
+          "#1f3c88",
+          "#26479a",
+          "#3456a8",
+          "#b7c6ea",
+          "#dbe3f5",
+          "#eef2fb"
+        ],
+        "scaleSource": "tailwind sea-900..50"
+      },
+      "enamel-wash": {
+        "role": "secondary",
+        "displayName": "Enamel Wash",
+        "canonical": "#eef2fb",
+        "oklch": "oklch(96.1% 0.013 266.7)",
+        "tonalRamp": [
+          "#111f47",
+          "#182f6b",
+          "#1f3c88",
+          "#26479a",
+          "#3456a8",
+          "#b7c6ea",
+          "#dbe3f5",
+          "#eef2fb"
+        ],
+        "scaleSource": "tailwind sea-900..50"
+      },
+      "footer-glint": {
+        "role": "secondary",
+        "displayName": "Footer Glint",
+        "canonical": "#9db0e0",
+        "oklch": "oklch(76.0% 0.072 267.9)",
+        "tonalRamp": [
+          "#050a1d",
+          "#182240",
+          "#303e64",
+          "#4c5c87",
+          "#6e7fab",
+          "#94a4cb",
+          "#becae8",
+          "#e8eefe"
+        ]
+      },
+      "plate-rule-white": {
+        "role": "neutral",
+        "displayName": "Plate Rule White",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#808080",
+          "#a4a4a4",
+          "#cacaca",
+          "#eeeeee"
+        ]
+      },
+      "lime-wash": {
+        "role": "neutral",
+        "displayName": "Lime-wash",
+        "canonical": "#f4f4f1",
+        "oklch": "oklch(96.6% 0.004 106.5)",
+        "tonalRamp": [
+          "#0b0b0a",
+          "#242422",
+          "#40403e",
+          "#5e5e5b",
+          "#80807e",
+          "#a5a5a2",
+          "#cacac9",
+          "#eeeeed"
+        ]
+      },
+      "plaster-shade": {
+        "role": "neutral",
+        "displayName": "Plaster Shade",
+        "canonical": "#ebebe6",
+        "oklch": "oklch(93.9% 0.007 106.5)",
+        "tonalRamp": [
+          "#0b0b09",
+          "#242421",
+          "#40403c",
+          "#5e5e5a",
+          "#80807c",
+          "#a5a5a1",
+          "#cbcbc8",
+          "#eeeeed"
+        ]
+      },
+      "plaster-joint": {
+        "role": "neutral",
+        "displayName": "Plaster Joint",
+        "canonical": "#dfe0d9",
+        "oklch": "oklch(90.4% 0.009 113.2)",
+        "tonalRamp": [
+          "#0b0b09",
+          "#242420",
+          "#40403b",
+          "#5d5e58",
+          "#80817b",
+          "#a4a5a0",
+          "#cacbc7",
+          "#eeefec"
+        ]
+      },
+      "plaster-line": {
+        "role": "neutral",
+        "displayName": "Plaster Line",
+        "canonical": "#c8cac1",
+        "oklch": "oklch(83.5% 0.013 116.9)",
+        "tonalRamp": [
+          "#0b0c08",
+          "#24251f",
+          "#3f413a",
+          "#5d5f57",
+          "#7f8179",
+          "#a4a59e",
+          "#cacbc6",
+          "#eeefec"
+        ]
+      },
+      "control-edge": {
+        "role": "neutral",
+        "displayName": "Control Edge",
+        "canonical": "#8a8e82",
+        "oklch": "oklch(64.0% 0.018 122.0)",
+        "tonalRamp": [
+          "#0a0c07",
+          "#23251d",
+          "#3e4137",
+          "#5c5f54",
+          "#7e8277",
+          "#a3a69c",
+          "#c9ccc4",
+          "#eeefeb"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#17213a",
+        "oklch": "oklch(25.2% 0.050 266.4)",
+        "tonalRamp": [
+          "#060b17",
+          "#1b2338",
+          "#343f59",
+          "#515d7a",
+          "#73809e",
+          "#99a5bf",
+          "#c1cbdf",
+          "#eaeef9"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Ink Muted",
+        "canonical": "#4f5a70",
+        "oklch": "oklch(46.7% 0.038 264.1)",
+        "tonalRamp": [
+          "#070b15",
+          "#1c2433",
+          "#364053",
+          "#535e74",
+          "#758097",
+          "#9aa5b9",
+          "#c3cbda",
+          "#eaeff7"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Ink Soft",
+        "canonical": "#8a93a3",
+        "oklch": "oklch(66.1% 0.026 262.1)",
+        "tonalRamp": [
+          "#080b12",
+          "#1f242e",
+          "#39404d",
+          "#565e6d",
+          "#788190",
+          "#9da5b3",
+          "#c5cbd5",
+          "#ebeff4"
+        ]
+      },
+      "danger": {
+        "role": "status",
+        "displayName": "Danger Red",
+        "canonical": "#dc2626",
+        "oklch": "oklch(57.7% 0.215 27.3)",
+        "tonalRamp": [
+          "#2f0000",
+          "#5f0000",
+          "#8d0000",
+          "#b90000",
+          "#e23732",
+          "#ff7063",
+          "#ffa89c",
+          "#ffded6"
+        ]
+      },
+      "danger-deep": {
+        "role": "status",
+        "displayName": "Danger Red Deep",
+        "canonical": "#b91c1c",
+        "oklch": "oklch(50.5% 0.190 27.5)",
+        "tonalRamp": [
+          "#2b0000",
+          "#590000",
+          "#860000",
+          "#b00c13",
+          "#d8463d",
+          "#f8786b",
+          "#ffada1",
+          "#ffe0d9"
+        ]
+      },
+      "danger-wash": {
+        "role": "status",
+        "displayName": "Danger Wash",
+        "canonical": "#fef2f2",
+        "oklch": "oklch(97.1% 0.013 17.4)",
+        "tonalRamp": [
+          "#0e0a0a",
+          "#292222",
+          "#463d3d",
+          "#655b5b",
+          "#887d7d",
+          "#aba2a2",
+          "#d0c8c8",
+          "#f1eded"
+        ]
+      },
+      "success-deep": {
+        "role": "status",
+        "displayName": "Success Green Deep",
+        "canonical": "#15803d",
+        "oklch": "oklch(52.7% 0.137 150.1)",
+        "tonalRamp": [
+          "#001300",
+          "#003100",
+          "#005113",
+          "#007230",
+          "#399654",
+          "#6db97e",
+          "#a4daae",
+          "#dbf7e0"
+        ]
+      },
+      "success-wash": {
+        "role": "status",
+        "displayName": "Success Wash",
+        "canonical": "#f0fdf4",
+        "oklch": "oklch(98.2% 0.018 155.8)",
+        "tonalRamp": [
+          "#080d09",
+          "#1f2621",
+          "#39433c",
+          "#566159",
+          "#78837c",
+          "#9da8a1",
+          "#c5cdc7",
+          "#ecf0ed"
+        ]
+      },
+      "warning-deep": {
+        "role": "status",
+        "displayName": "Warning Amber Deep",
+        "canonical": "#b45309",
+        "oklch": "oklch(55.5% 0.146 49.0)",
+        "tonalRamp": [
+          "#230000",
+          "#4c0200",
+          "#741d00",
+          "#9b3c00",
+          "#c16226",
+          "#e28c5d",
+          "#fbba98",
+          "#ffe6d4"
+        ]
+      },
+      "warning-wash": {
+        "role": "status",
+        "displayName": "Warning Wash",
+        "canonical": "#fffbeb",
+        "oklch": "oklch(98.7% 0.021 95.3)",
+        "tonalRamp": [
+          "#0d0b06",
+          "#26241b",
+          "#434034",
+          "#615e50",
+          "#848073",
+          "#a8a598",
+          "#cdcbc1",
+          "#f0eeea"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The page h1 in enamel cobalt; held to about 11ch on home."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section h2s in enamel cobalt, 2.25rem rising to 3rem."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "h3s in deep enamel; button lettering uses the same condensed 700."
+      },
+      "plate-lettering": {
+        "displayName": "Plate Lettering",
+        "purpose": "Words and numerals painted on plates: street names, dates, walking times, check-in times."
+      },
+      "plate-label": {
+        "displayName": "Plate Label",
+        "purpose": "Uppercase tracked field labels and Latin lines on plates, in enamel tint."
+      },
+      "body-lede": {
+        "displayName": "Body Lede",
+        "purpose": "Ledes and descriptions in ink muted."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Nav links, ghost buttons, form labels, calendar days, mobile menu rows. Always 600; no 500 weight is loaded."
+      }
+    },
+    "shadows": [
+      {
+        "name": "plate-stand-off",
+        "value": "0 1px 1px rgba(17,31,71,.12), 0 6px 14px -8px rgba(17,31,71,.45)",
+        "purpose": "Every plate and the host portrait: a sign standing just off the wall."
+      },
+      {
+        "name": "card-rest",
+        "value": "0 1px 2px rgba(17,31,71,.06), 0 8px 24px -12px rgba(17,31,71,.2)",
+        "purpose": "White working cards and the map, with a 1px 5% night-cobalt ring."
+      },
+      {
+        "name": "bar-lift",
+        "value": "0 -8px 24px -12px rgba(17,31,71,.25)",
+        "purpose": "The sticky booking summary bar on phones, cast upward onto the page."
+      },
+      {
+        "name": "plate-rule",
+        "value": "inset 0 0 0 4px #1f3c88, inset 0 0 0 6px #fff",
+        "purpose": "The painted white rule on plates (3px/5px on buttons). Paint, not depth."
+      },
+      {
+        "name": "focus-ring",
+        "value": "0 0 0 2px #f4f4f1, 0 0 0 4px #3456a8",
+        "purpose": "Global :focus-visible ring: 2px signal cobalt with 2px lime-wash offset."
+      }
+    ],
+    "motion": [
+      {
+        "name": "colors-standard",
+        "value": "150ms cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Colour transitions on buttons, plates, calendar days."
+      },
+      {
+        "name": "fade-in",
+        "value": "opacity 0 to 1, 0.4s ease-out",
+        "purpose": "Mobile menu panel appearing."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "durations 0.01ms, smooth scroll off",
+        "purpose": "Applied globally under prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "container-max",
+        "value": "1200px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The default action: a small enamel plate with a painted white rule.",
+      "html": "<button class=\"ds-btn-primary\">Check availability</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:8px;padding:10px 20px;font-family:'Sofia Sans Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;font-size:16px;font-weight:700;line-height:1.25;cursor:pointer;transition:background-color .15s cubic-bezier(.4,0,.2,1),box-shadow .15s cubic-bezier(.4,0,.2,1);background:#1f3c88;color:#fff;box-shadow:inset 0 0 0 3px #1f3c88,inset 0 0 0 5px #fff;}.ds-btn-primary:hover{background:#182f6b;box-shadow:inset 0 0 0 3px #182f6b,inset 0 0 0 5px #fff;}.ds-btn-primary:focus-visible{outline:2px solid #3456a8;outline-offset:2px;}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary links such as View all and All amenities.",
+      "html": "<button class=\"ds-btn-outline\">View all</button>",
+      "css": ".ds-btn-outline{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:8px;padding:10px 20px;font-family:'Sofia Sans Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;font-size:16px;font-weight:700;line-height:1.25;cursor:pointer;transition:background-color .15s cubic-bezier(.4,0,.2,1),box-shadow .15s cubic-bezier(.4,0,.2,1);background:#fff;color:#1f3c88;box-shadow:inset 0 0 0 2px #1f3c88;}.ds-btn-outline:hover{background:#eef2fb;}.ds-btn-outline:focus-visible{outline:2px solid #3456a8;outline-offset:2px;}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Language switch, menu toggle, calendar month arrows.",
+      "html": "<button class=\"ds-btn-ghost\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20\"/><path d=\"M2 12h20\"/></svg>Български</button>",
+      "css": ".ds-btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:8px;padding:10px 20px;font-family:'Sofia Sans Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;font-size:16px;font-weight:700;line-height:1.25;cursor:pointer;transition:background-color .15s cubic-bezier(.4,0,.2,1),box-shadow .15s cubic-bezier(.4,0,.2,1);font-family:'Sofia Sans',ui-sans-serif,system-ui,sans-serif;background:transparent;color:#1f3c88;font-size:14px;font-weight:600;padding:10px 12px;}.ds-btn-ghost:hover{background:#eef2fb;}.ds-btn-ghost:focus-visible{outline:2px solid #3456a8;outline-offset:2px;}"
+    },
+    {
+      "name": "Street Plaque",
+      "kind": "custom",
+      "refersTo": "plate",
+      "description": "The signature plate: Cyrillic street name with the Latin line beneath, slightly tilted, in the opening only.",
+      "html": "<figure class=\"ds-sign\"><div class=\"ds-sign-plate\" lang=\"bg\"><div class=\"ds-sign-face\"><p class=\"ds-sign-name\">бул. „Богориди“</p><p class=\"ds-sign-latin\" lang=\"en\">Bogoridi Blvd</p></div></div></figure>",
+      "css": ".ds-sign{margin:0;max-width:19rem;}.ds-sign-plate{background:#1f3c88;color:#fff;border-radius:10px;box-shadow:inset 0 0 0 4px #1f3c88,inset 0 0 0 6px #fff,0 1px 1px rgba(17,31,71,.12),0 6px 14px -8px rgba(17,31,71,.45);transform:rotate(-1.5deg);}.ds-sign-face{padding:20px 26px 22px;text-align:center;}.ds-sign-name{margin:0;font-family:'Sofia Sans Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;font-size:40px;font-weight:800;line-height:1;}.ds-sign-latin{margin:6px 0 0;font-family:'Sofia Sans Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.16em;color:#dbe3f5;}"
+    },
+    {
+      "name": "Search Plate",
+      "kind": "custom",
+      "refersTo": "plate",
+      "description": "The primary action of the opening: dates and guests set into one long plate, with a white plate as submit.",
+      "html": "<form class=\"ds-search\" onsubmit=\"return false\"><div class=\"ds-search-face\"><label class=\"ds-search-field\"><span class=\"ds-search-label\">Check-in</span><span class=\"ds-search-value ds-empty\">Add date</span></label><label class=\"ds-search-field\"><span class=\"ds-search-label\">Check-out</span><span class=\"ds-search-value ds-empty\">Add date</span></label><label class=\"ds-search-field\"><span class=\"ds-search-label\">Guests</span><span class=\"ds-search-value\">2</span></label><div class=\"ds-search-go\"><button class=\"ds-search-btn\">Check availability <svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></button></div></div></form>",
+      "css": ".ds-search{background:#1f3c88;color:#fff;border-radius:10px;box-shadow:inset 0 0 0 4px #1f3c88,inset 0 0 0 6px #fff,0 1px 1px rgba(17,31,71,.12),0 6px 14px -8px rgba(17,31,71,.45);}.ds-search-face{padding:6px;display:grid;grid-template-columns:1fr 1fr .8fr auto;}.ds-search-field{display:block;padding:12px 20px 14px;border-right:2px solid rgba(255,255,255,.35);cursor:pointer;}.ds-search-field:focus-within{outline:2px solid #fff;outline-offset:-6px;}.ds-search-label{display:block;font-family:'Sofia Sans Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#dbe3f5;}.ds-search-value{display:block;margin-top:4px;font-family:'Sofia Sans Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;font-size:28px;font-weight:800;line-height:1.2;color:#fff;}.ds-search-value.ds-empty{color:#b7c6ea;}.ds-search-go{padding:8px;}.ds-search-btn{display:flex;align-items:center;justify-content:center;gap:8px;height:100%;min-height:56px;width:100%;border:0;border-radius:6px;background:#fff;color:#1f3c88;padding:0 24px;font-family:'Sofia Sans Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;font-size:20px;font-weight:800;cursor:pointer;transition:background-color .15s;}.ds-search-btn:hover{background:#eef2fb;}.ds-search-btn:focus-visible{outline:none;box-shadow:0 0 0 2px #f4f4f1,0 0 0 4px #3456a8;}"
+    },
+    {
+      "name": "Direction Plate",
+      "kind": "custom",
+      "refersTo": "plate",
+      "description": "One walking-time plate on the From the door signpost, cut to an arrow point.",
+      "html": "<div class=\"ds-dir\"><div class=\"ds-dir-face\"><span class=\"ds-dir-place\"><span class=\"ds-dir-name\" lang=\"bg\">Морската градина</span><span class=\"ds-dir-latin\" lang=\"en\">Sea Garden</span></span><span class=\"ds-dir-dist\"><span class=\"ds-dir-num\">5</span><span class=\"ds-dir-unit\">min walk</span></span></div></div>",
+      "css": ".ds-dir{background:#1f3c88;color:#fff;border-radius:10px;box-shadow:inset 0 0 0 4px #1f3c88,inset 0 0 0 6px #fff,0 1px 1px rgba(17,31,71,.12),0 6px 14px -8px rgba(17,31,71,.45);width:86%;clip-path:polygon(0 0,93% 0,calc(100% - 7px) 50%,93% 100%,0 100%);}.ds-dir-face{padding:12px 48px 12px 20px;display:flex;align-items:center;gap:12px;}.ds-dir-place{flex:1;min-width:0;white-space:nowrap;}.ds-dir-name{display:block;font-family:'Sofia Sans Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;font-size:28px;font-weight:800;line-height:1.25;}.ds-dir-latin{display:block;font-family:'Sofia Sans Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.16em;color:#dbe3f5;}.ds-dir-dist{font-family:'Sofia Sans Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;}.ds-dir-num{font-size:48px;line-height:1;}.ds-dir-unit{margin-left:6px;font-size:16px;font-weight:700;color:#dbe3f5;}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Form fields on booking and contact.",
+      "html": "<label class=\"ds-label\" for=\"ds-name\">Full name</label><input id=\"ds-name\" class=\"ds-input\" placeholder=\"Your name\">",
+      "css": ".ds-label{display:block;margin-bottom:6px;font-family:'Sofia Sans',ui-sans-serif,system-ui,sans-serif;font-size:14px;font-weight:600;color:#17213a;}.ds-input{display:block;width:100%;border:1px solid #8a8e82;border-radius:8px;background:#fff;padding:10px 14px;font-family:'Sofia Sans',ui-sans-serif,system-ui,sans-serif;font-size:16px;color:#17213a;transition:border-color .15s,box-shadow .15s;}.ds-input::placeholder{color:#4f5a70;}.ds-input:focus{outline:none;border-color:#3456a8;box-shadow:0 0 0 2px #b7c6ea;}.ds-input[aria-invalid=true]{border-color:#dc2626;}.ds-input:disabled{background:#ebebe6;cursor:not-allowed;}"
+    },
+    {
+      "name": "Working Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "White card for operating steps: calendar, stay summary, guest details, confirmation.",
+      "html": "<section class=\"ds-card\"><h3 class=\"ds-card-title\">Your stay</h3><div class=\"ds-card-inset\"><span>3 nights</span><b>€240</b></div></section>",
+      "css": ".ds-card{background:#fff;border-radius:12px;padding:28px;box-shadow:0 0 0 1px rgba(17,31,71,.05),0 1px 2px rgba(17,31,71,.06),0 8px 24px -12px rgba(17,31,71,.2);font-family:'Sofia Sans',ui-sans-serif,system-ui,sans-serif;color:#17213a;}.ds-card-title{margin:0 0 16px;font-family:'Sofia Sans Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;font-size:24px;font-weight:700;color:#182f6b;}.ds-card-inset{display:flex;justify-content:space-between;background:#ebebe6;border-radius:12px;padding:12px;font-variant-numeric:tabular-nums;}"
+    },
+    {
+      "name": "Header Navigation",
+      "kind": "nav",
+      "refersTo": "plate",
+      "description": "Sticky lime-wash header: site name on a small plate, condensed-free links, Book plate at right.",
+      "html": "<header class=\"ds-nav\"><a class=\"ds-nav-brand\" href=\"#\">Morski Briz Apartment</a><nav class=\"ds-nav-links\"><a href=\"#\" aria-current=\"page\">Home</a><a href=\"#\">The apartment</a><a href=\"#\">Gallery</a><a href=\"#\">Contact</a></nav><a class=\"ds-nav-book\" href=\"#\">Check availability</a></header>",
+      "css": ".ds-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 24px;min-height:64px;background:rgba(244,244,241,.95);border-bottom:1px solid rgba(17,31,71,.1);font-family:'Sofia Sans',ui-sans-serif,system-ui,sans-serif;}.ds-nav-brand{background:#1f3c88;color:#fff;border-radius:10px;box-shadow:inset 0 0 0 4px #1f3c88,inset 0 0 0 6px #fff,0 1px 1px rgba(17,31,71,.12),0 6px 14px -8px rgba(17,31,71,.45);display:block;padding:14px 22px;font-family:'Sofia Sans Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;font-size:24px;font-weight:800;line-height:1.25;text-decoration:none;}.ds-nav-brand:hover{background:#182f6b;box-shadow:inset 0 0 0 4px #182f6b,inset 0 0 0 6px #fff,0 6px 14px -8px rgba(17,31,71,.45);}.ds-nav-links{display:flex;gap:4px;}.ds-nav-links a{padding:8px 12px;border-radius:6px;font-size:15px;font-weight:600;color:#4f5a70;text-decoration:none;text-underline-offset:6px;}.ds-nav-links a:hover{color:#1f3c88;}.ds-nav-links a[aria-current=page]{color:#1f3c88;text-decoration:underline;text-decoration-thickness:2px;}.ds-nav-links a:focus-visible,.ds-nav-book:focus-visible{outline:none;box-shadow:0 0 0 2px #f4f4f1,0 0 0 4px #3456a8;}.ds-nav-book{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:8px;padding:10px 20px;font-family:'Sofia Sans Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;font-size:16px;font-weight:700;line-height:1.25;cursor:pointer;transition:background-color .15s cubic-bezier(.4,0,.2,1),box-shadow .15s cubic-bezier(.4,0,.2,1);background:#1f3c88;color:#fff;text-decoration:none;box-shadow:inset 0 0 0 3px #1f3c88,inset 0 0 0 5px #fff;}.ds-nav-book:hover{background:#182f6b;box-shadow:inset 0 0 0 3px #182f6b,inset 0 0 0 5px #fff;}"
+    },
+    {
+      "name": "Amenity Medallion",
+      "kind": "chip",
+      "refersTo": "amenity-medallion",
+      "description": "Round enamel-wash medallion with a line icon, beside each amenity.",
+      "html": "<div class=\"ds-amenity\"><span class=\"ds-amenity-icon\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 20h.01\"/><path d=\"M2 8.82a15 15 0 0 1 20 0\"/><path d=\"M5 12.86a10 10 0 0 1 14 0\"/><path d=\"M8.5 16.43a5 5 0 0 1 7 0\"/></svg></span>Free Wi-Fi</div>",
+      "css": ".ds-amenity{display:flex;align-items:center;gap:12px;font-family:'Sofia Sans',ui-sans-serif,system-ui,sans-serif;font-size:16px;color:#17213a;}.ds-amenity-icon{display:grid;place-items:center;width:40px;height:40px;flex-shrink:0;border-radius:9999px;background:#eef2fb;color:#1f3c88;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Street Corner on Bogoridi",
+    "overview": "The site is a street corner in central Burgas. The ground is lime-washed plaster, pale and slightly grey-green, never cream. Everything that names, labels or acts is a cobalt enamel plate fixed to that wall: a cobalt face, a thin white rule painted just inside its edge, small rounded corners, and a low cast shadow where it stands off the plaster. The street plaque in the opening, the search bar, the walking-time signpost, the check-in/check-out board, the host's name, the address and the closing call to action are all the same object.\n\nDensity is calm and municipal: big condensed cobalt headings, generous plaster between sections, reading text in a quiet blue-black. Cobalt is the only hue the system owns; status colours exist only to carry meaning. Signs carry Cyrillic first, with a small tracked Latin line beneath, as Burgas street signs do. The admin area inherits these tokens but is an operating surface; plates there are optional, tokens are not.\n\nThe world replaced an earlier cream, serif and terracotta identity. Nothing from that world (warm cream ground, serif display, terracotta accent, teal-tinted shadows) carries forward.",
+    "keyCharacteristics": [
+      "Plaster-white ground, cobalt enamel plates, one hue family.",
+      "The plate (cobalt face, inset white rule, 10px corners) is the signature and carries actions, signs and labels.",
+      "Heavy Sofia Sans Condensed for headings and plate lettering; Sofia Sans for reading.",
+      "Cyrillic first on signs, with a tracked uppercase Latin line under it.",
+      "Depth comes from plates standing off the wall, never from floating cards."
+    ],
+    "rules": [
+      {
+        "name": "The One Enamel Rule",
+        "body": "Cobalt is the only owned hue. Actions and signs share it, so a button and a street sign read as the same material. Do not introduce a second brand accent; the token named `clay` is an alias onto the cobalt scale, not a warm colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The Soft Ink Rule",
+        "body": "Ink Soft is below 4.5:1 on the ground. It never carries text someone must read.",
+        "section": "colors"
+      },
+      {
+        "name": "The Cyrillic First Rule",
+        "body": "On any sign, the Bulgarian name is the large lettering and the Latin form sits beneath it, smaller, uppercase and tracked. On Bulgarian pages the Latin line is omitted.",
+        "section": "typography"
+      },
+      {
+        "name": "The Condensed Is Lettering Rule",
+        "body": "The condensed face is for headings and for words painted on plates. Paragraphs, form copy and long labels stay in Sofia Sans.",
+        "section": "typography"
+      },
+      {
+        "name": "The Wall Rule",
+        "body": "Shadows are always tinted night cobalt (17,31,71) and always short. A shadow that implies the object is floating, or that carries any other tint, is off-world.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do put every sign, label of place, and primary action on a plate: cobalt face (#1f3c88), painted white rule, 10px corners, short cobalt-tinted shadow.",
+      "Do set signs Cyrillic first, with the Latin name beneath in uppercase, tracked 0.14 to 0.16em, in enamel tint.",
+      "Do keep the ground lime-wash (#f4f4f1) and let sections breathe (56px, 80px from 640px).",
+      "Do use Sofia Sans Condensed 800 for headings and plate lettering, and Sofia Sans for reading text.",
+      "Do use tabular numerals for prices, times and walking distances.",
+      "Do keep focus visible with the 2px signal-cobalt ring and lime-wash offset.",
+      "Do end onward calls to action with a 20px lucide ArrowRight icon, never a typed arrow character."
+    ],
+    "donts": [
+      "Don't introduce a warm accent, a cream ground or a serif display; they belong to the replaced world.",
+      "Don't nest a box to draw a plate's white rule; it is painted with an inset shadow.",
+      "Don't tint shadows anything but night cobalt, or make them long enough to float an object off the wall.",
+      "Don't use ink soft (#8a93a3) for text a visitor must read.",
+      "Don't tilt plates other than the single street plaque in the opening.",
+      "Don't set paragraphs or form copy in the condensed face."
+    ]
+  }
+}

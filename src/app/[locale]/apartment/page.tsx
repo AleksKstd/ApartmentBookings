@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { notFound } from "next/navigation";
 import { AmenityList } from "@/components/site/amenity-list";
 import { FactLine } from "@/components/site/facts";
@@ -38,7 +39,7 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/apa
             <FactLine property={property} pricing={pricing} t={t} className="mt-5 text-lg" />
             <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-4">
               <Link href={`/${locale}/booking`} className="btn-primary px-6 py-3 text-lg">
-                {t.common.checkAvailability} <span aria-hidden>→</span>
+                {t.common.checkAvailability} <ArrowRight className="h-5 w-5" aria-hidden />
               </Link>
               <p className="text-ink-muted">
                 {t.apartment.pricesFrom} <b className="font-semibold tabular-nums text-ink">{formatMoney(lowestNightly, pricing.currency, locale)}</b> / {t.common.night}
@@ -106,7 +107,6 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/apa
               <div className="mt-6">
                 <MapEmbed
                   title={t.apartment.locationTitle}
-                  address={contact.address ?? property.name}
                   showLabel={t.common.showMap}
                   note={t.common.mapNote}
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.01}%2C${property.latitude - 0.006}%2C${property.longitude + 0.01}%2C${property.latitude + 0.006}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`}
