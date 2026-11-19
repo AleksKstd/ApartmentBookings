@@ -10,10 +10,10 @@ export const STATUS_LABELS: Record<BookingStatus, string> = {
 };
 
 const STATUS_STYLES: Record<BookingStatus, string> = {
-  pending: "bg-amber-100 text-amber-800",
-  awaiting_payment: "bg-sky-100 text-sky-800",
-  confirmed: "bg-green-100 text-green-800",
-  cancelled: "bg-gray-200 text-gray-700",
+  pending: "bg-warning-100 text-warning-800",
+  awaiting_payment: "bg-info-100 text-info-800",
+  confirmed: "bg-success-100 text-success-800",
+  cancelled: "bg-neutral-200 text-neutral-700",
 };
 
 export const PAYMENT_LABELS: Record<PaymentStatus, string> = {
@@ -29,7 +29,7 @@ export function StatusBadge({ status }: { status: BookingStatus }) {
 
 export function PaymentBadge({ status }: { status: PaymentStatus }) {
   return (
-    <span className={cn("badge", status === "paid" ? "bg-green-50 text-green-700 ring-1 ring-green-200" : status === "refunded" ? "bg-violet-50 text-violet-700" : "bg-sand-200 text-ink-muted")}>
+    <span className={cn("badge", status === "paid" ? "bg-success-50 text-success-700 ring-1 ring-success-200" : status === "refunded" ? "bg-external-50 text-external-700" : "bg-sand-200 text-ink-muted")}>
       {PAYMENT_LABELS[status]}
     </span>
   );

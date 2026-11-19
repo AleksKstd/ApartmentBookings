@@ -4,7 +4,7 @@ import { isEmailConfigured } from "@/lib/email";
 
 export const metadata = { title: "Имейли" };
 
-const STATUS = { sent: ["Изпратен", "bg-green-100 text-green-800"], logged: ["Само записан", "bg-sand-200 text-ink-muted"], failed: ["Грешка", "bg-red-100 text-red-800"] } as const;
+const STATUS = { sent: ["Изпратен", "bg-success-100 text-success-800"], logged: ["Само записан", "bg-sand-200 text-ink-muted"], failed: ["Грешка", "bg-danger-100 text-danger-800"] } as const;
 
 export default async function EmailsPage() {
   const emails = await getRepository().listEmails(100);
@@ -28,7 +28,7 @@ export default async function EmailsPage() {
                     <span className="text-ink-muted">→ {e.to}</span>
                     <span className="ml-auto text-xs text-ink-muted">{showDateTime(e.createdAt)}</span>
                   </summary>
-                  {e.error && <p className="mt-2 text-sm text-red-700">{e.error}</p>}
+                  {e.error && <p className="mt-2 text-sm text-danger-700">{e.error}</p>}
                   <pre className="mt-3 whitespace-pre-wrap rounded-xl bg-sand-100 p-4 text-xs">{e.text}</pre>
                 </details>
               </li>

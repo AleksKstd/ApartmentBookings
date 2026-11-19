@@ -30,18 +30,18 @@ export default async function SyncPage() {
                 <li key={f.id} className="space-y-2 py-4">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold">{f.name}</span>
-                    <span className={`badge ${f.isActive ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-700"}`}>{f.isActive ? "Активен" : "Спрян"}</span>
-                    {f.lastError && <span className="badge bg-red-100 text-red-800">Грешка</span>}
+                    <span className={`badge ${f.isActive ? "bg-success-100 text-success-800" : "bg-neutral-200 text-neutral-700"}`}>{f.isActive ? "Активен" : "Спрян"}</span>
+                    {f.lastError && <span className="badge bg-danger-100 text-danger-800">Грешка</span>}
                   </div>
                   <p className="break-all text-xs text-ink-muted">{f.url}</p>
                   <p className="text-xs text-ink-muted">
                     {f.lastSyncedAt ? `Последна синхронизация: ${showDateTime(f.lastSyncedAt)} · ${f.lastEventCount ?? 0} периода` : "Още не е синхронизиран"}
-                    {f.lastError && <span className="block text-red-700">{f.lastError}</span>}
+                    {f.lastError && <span className="block text-danger-700">{f.lastError}</span>}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <ActionButton action={syncFeedNow.bind(null, f.id)}>Синхронизирай</ActionButton>
                     <ActionButton action={toggleFeed.bind(null, f.id, !f.isActive)} className="btn-ghost">{f.isActive ? "Спри" : "Активирай"}</ActionButton>
-                    <ActionButton action={deleteFeed.bind(null, f.id)} className="btn-ghost text-red-700" confirm="Да премахна ли календара и импортираните от него дати?">Премахни</ActionButton>
+                    <ActionButton action={deleteFeed.bind(null, f.id)} className="btn-ghost text-danger-700" confirm="Да премахна ли календара и импортираните от него дати?">Премахни</ActionButton>
                   </div>
                 </li>
               ))}

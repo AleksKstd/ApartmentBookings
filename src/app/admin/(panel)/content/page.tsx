@@ -32,7 +32,7 @@ export default async function ContentPage() {
                   <LocalizedField label={i < h.highlights.length ? `Предимство ${i + 1} — заглавие` : "Ново предимство — заглавие"} name={`highlights.${i}.title`} value={item.title} maxLength={120} />
                   <LocalizedField label="Текст" name={`highlights.${i}.text`} value={item.text} maxLength={400} />
                   {i < h.highlights.length && (
-                    <label className="flex items-center gap-2 text-sm text-red-700"><input type="checkbox" name={`highlights.${i}.remove`} /> Премахни</label>
+                    <label className="flex items-center gap-2 text-sm text-danger-700"><input type="checkbox" name={`highlights.${i}.remove`} /> Премахни</label>
                   )}
                 </div>
               ))}

@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
@@ -7,9 +8,18 @@ const config: Config = {
     extend: {
       colors: {
         sea: { 50: "#eef6f7", 100: "#d5e8ec", 200: "#a9d0d8", 500: "#2f7184", 600: "#235f71", 700: "#1d4e5f", 800: "#173e4b", 900: "#102c35" },
-        sand: { 50: "#fbf9f5", 100: "#f6f3ee", 200: "#ece5d8", 300: "#dccfb8" },
+        // 400 is the form-control border: 3.3:1 on white (WCAG 1.4.11).
+        sand: { 50: "#fbf9f5", 100: "#f6f3ee", 200: "#ece5d8", 300: "#dccfb8", 400: "#a88953" },
         clay: { 400: "#d9896a", 500: "#c9714b", 600: "#b05d39", 700: "#8f4a2c" },
+        // ink-soft is below 4.5:1: decorative marks and disabled states only, never text to be read.
         ink: { DEFAULT: "#1f2a2e", muted: "#5b6b70", soft: "#8a979b" },
+        // Status roles. Use these instead of raw palette hues so meanings stay consistent.
+        success: colors.green,
+        danger: colors.red,
+        warning: colors.amber,
+        info: colors.sky,
+        neutral: colors.gray,
+        external: colors.violet, // things that come from outside the booking flow: iCal sync, refunds
       },
       fontFamily: {
         sans: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],

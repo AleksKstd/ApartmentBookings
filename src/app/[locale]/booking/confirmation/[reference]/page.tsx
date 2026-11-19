@@ -44,7 +44,7 @@ export default async function ConfirmationPage({ params, searchParams }: PagePro
     Icon = CircleCheck;
     title = t.confirmation.paidTitle;
     text = fmt(t.confirmation.paidText, { email: booking.guestEmail });
-    tone = "bg-green-50 text-green-700";
+    tone = "bg-success-50 text-success-700";
   } else if (processing) {
     title = t.confirmation.processingTitle;
     text = t.confirmation.processingText;
@@ -52,7 +52,7 @@ export default async function ConfirmationPage({ params, searchParams }: PagePro
     Icon = TriangleAlert;
     title = t.confirmation.cancelledTitle;
     text = t.confirmation.cancelledText;
-    tone = "bg-amber-50 text-amber-700";
+    tone = "bg-warning-50 text-warning-700";
   }
 
   const dateFmt = new Intl.DateTimeFormat(locale === "bg" ? "bg-BG" : "en-GB", { weekday: "short", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });

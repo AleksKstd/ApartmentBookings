@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, LoaderCircle, Users } from "lucide-react";
 import { submitBooking, type BookingFormState } from "@/app/[locale]/booking/actions";
 import { fmt, type Dictionary } from "@/i18n";
@@ -70,9 +70,20 @@ export function BookingWidget(props: Props) {
   const money = (cents: number) => formatMoney(cents, quote.status === "ok" ? quote.quote.currency : "EUR", locale);
   const lineLabel = (label: string, quantity: number) => fmt((t.booking.lines as Record<string, string>)[label] ?? label, { n: quantity });
   const ready = quote.status === "ok";
+  const errors = state.fieldErrors;
+  /** Links a field to its error message so screen readers announce both together. */
+  const invalid = (id: keyof NonNullable<typeof errors>) =>
+    errors?.[id] ? { "aria-invalid": true, "aria-describedby": `${id}-error` } : {};
+
+  // After a failed submit, move focus to the first field that needs attention.
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (!errors) return;
+    formRef.current?.querySelector<HTMLElement>("[aria-invalid=true]")?.focus();
+  }, [errors]);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.35fr_1fr] lg:items-start">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.35fr_1fr] lg:items-start">
       <div className="card p-5 sm:p-7">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 font-sans text-lg font-semibold">
@@ -135,7 +146,7 @@ export function BookingWidget(props: Props) {
                 <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> {t.common.loading}
               </p>
             )}
-            {quote.status === "error" && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700" role="alert">{quote.message}</p>}
+            {quote.status === "error" && <p className="rounded-xl bg-danger-50 p-3 text-sm text-danger-700" role="alert">{quote.message}</p>}
             {quote.status === "ok" && (
               <div>
                 <ul className="space-y-2 text-sm">
@@ -146,7 +157,7 @@ export function BookingWidget(props: Props) {
                           ? `${money(line.unitAmount)} × ${line.quantity} ${line.quantity === 1 ? t.common.night : t.common.nights}`
                           : lineLabel(line.label, line.quantity)}
                       </span>
-                      <span className={cn("font-medium", line.amount < 0 && "text-green-700")}>{money(line.amount)}</span>
+                      <span className={cn("font-medium", line.amount < 0 && "text-success-700")}>{money(line.amount)}</span>
                     </li>
                   ))}
                 </ul>
@@ -172,8 +183,14 @@ export function BookingWidget(props: Props) {
           </div>
         </section>
 
-        <form action={formAction} className={cn("card space-y-4 p-5 sm:p-7", !ready && "opacity-60")} aria-labelledby="details-title" noValidate>
+        <form ref={formRef} action={formAction} className="card space-y-4 p-5 sm:p-7" aria-labelledby="details-title" aria-describedby={ready ? undefined : "details-locked"} noValidate>
           <h2 id="details-title" className="font-sans text-lg font-semibold">{t.booking.yourDetails}</h2>
+          {!ready && (
+            <p id="details-locked" className="flex items-start gap-2 rounded-xl bg-sand-100 p-3 text-sm text-ink-muted">
+              <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-clay-500" aria-hidden />
+              {quote.status === "loading" ? t.booking.detailsLockedLoading : t.booking.detailsLocked}
+            </p>
+          )}
           <input type="hidden" name="checkIn" value={checkIn ?? ""} />
           <input type="hidden" name="checkOut" value={checkOut ?? ""} />
           <input type="hidden" name="guests" value={guests} />
@@ -183,30 +200,33 @@ export function BookingWidget(props: Props) {
           </div>
 
           <Field id="guestName" label={t.booking.fullName} error={state.fieldErrors?.guestName}>
-            <input id="guestName" name="guestName" className="input" autoComplete="name" defaultValue={state.values?.guestName} required minLength={2} maxLength={120} disabled={!ready} />
+            <input id="guestName" name="guestName" className="input" autoComplete="name" {...invalid("guestName")} defaultValue={state.values?.guestName} required minLength={2} maxLength={120} disabled={!ready} />
           </Field>
           <Field id="guestEmail" label={t.booking.email} error={state.fieldErrors?.guestEmail}>
-            <input id="guestEmail" name="guestEmail" type="email" className="input" autoComplete="email" defaultValue={state.values?.guestEmail} required maxLength={254} disabled={!ready} />
+            <input id="guestEmail" name="guestEmail" type="email" className="input" autoComplete="email" {...invalid("guestEmail")} defaultValue={state.values?.guestEmail} required maxLength={254} disabled={!ready} />
           </Field>
           <Field id="guestPhone" label={t.booking.phone} error={state.fieldErrors?.guestPhone}>
-            <input id="guestPhone" name="guestPhone" type="tel" className="input" autoComplete="tel" defaultValue={state.values?.guestPhone} required maxLength={40} disabled={!ready} />
+            <input id="guestPhone" name="guestPhone" type="tel" className="input" autoComplete="tel" {...invalid("guestPhone")} defaultValue={state.values?.guestPhone} required maxLength={40} disabled={!ready} />
           </Field>
           <Field id="guestNote" label={t.booking.note}>
             <textarea id="guestNote" name="guestNote" rows={3} className="input" maxLength={2000} placeholder={t.booking.notePlaceholder} defaultValue={state.values?.guestNote} disabled={!ready} />
           </Field>
           <div>
             <label className="flex items-start gap-3 text-sm">
-              <input type="checkbox" name="acceptTerms" className="mt-0.5 h-4 w-4 rounded border-sand-300 accent-sea-700" required disabled={!ready} aria-describedby={state.fieldErrors?.acceptTerms ? "acceptTerms-error" : undefined} />
+              <input type="checkbox" name="acceptTerms" className="mt-0.5 h-4 w-4 rounded border-sand-400 accent-sea-700" required disabled={!ready} {...invalid("acceptTerms")} />
               <span>
                 {t.booking.acceptTerms.split("{privacy}")[0]}
-                <Link href={`/${locale}/privacy`} className="text-sea-700 underline" target="_blank">{t.booking.privacyLink}</Link>
+                <Link href={`/${locale}/privacy`} className="text-sea-700 underline" target="_blank">
+                  {t.booking.privacyLink}
+                  <span className="sr-only"> ({t.common.opensInNewTab})</span>
+                </Link>
                 {t.booking.acceptTerms.split("{privacy}")[1]}
               </span>
             </label>
-            {state.fieldErrors?.acceptTerms && <p id="acceptTerms-error" className="mt-1 text-sm text-red-700">{state.fieldErrors.acceptTerms}</p>}
+            {state.fieldErrors?.acceptTerms && <p id="acceptTerms-error" className="mt-1 text-sm text-danger-700">{state.fieldErrors.acceptTerms}</p>}
           </div>
 
-          {state.error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700" role="alert">{state.error}</p>}
+          {state.error && <p className="rounded-xl bg-danger-50 p-3 text-sm text-danger-700" role="alert">{state.error}</p>}
 
           <button type="submit" className="btn-primary w-full py-3 text-base" disabled={!ready || pending}>
             {pending && <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />}
@@ -226,7 +246,7 @@ function Field({ id, label, error, children }: { id: string; label: string; erro
     <div>
       <label className="label" htmlFor={id}>{label}</label>
       {children}
-      {error && <p id={`${id}-error`} className="mt-1 text-sm text-red-700">{error}</p>}
+      {error && <p id={`${id}-error`} className="mt-1 text-sm text-danger-700">{error}</p>}
     </div>
   );
 }

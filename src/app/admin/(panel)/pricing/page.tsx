@@ -50,7 +50,7 @@ export default async function PricingPage() {
                       <div className="mt-4">
                         <SeasonForm season={s} />
                         <div className="mt-3">
-                          <ActionButton action={deleteSeasonalRate.bind(null, s.id)} className="btn-ghost text-red-700" confirm="Да изтрия ли сезона?">Изтрий сезона</ActionButton>
+                          <ActionButton action={deleteSeasonalRate.bind(null, s.id)} className="btn-ghost text-danger-700" confirm="Да изтрия ли сезона?">Изтрий сезона</ActionButton>
                         </div>
                       </div>
                     </details>

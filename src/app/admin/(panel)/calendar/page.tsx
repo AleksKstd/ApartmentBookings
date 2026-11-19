@@ -36,9 +36,9 @@ export default async function CalendarPage({ searchParams }: PageProps<"/admin/c
   }
   const styles: Record<Cell["kind"], string> = {
     booking: "bg-sea-700 text-white",
-    pending: "bg-amber-200 text-amber-900",
-    manual: "bg-gray-300 text-gray-800",
-    ical: "bg-violet-200 text-violet-900",
+    pending: "bg-warning-200 text-warning-900",
+    manual: "bg-neutral-300 text-neutral-800",
+    ical: "bg-external-200 text-external-900",
   };
   const upcomingBlocks = blocked.filter((b) => b.endDate > today);
 
@@ -110,9 +110,9 @@ export default async function CalendarPage({ searchParams }: PageProps<"/admin/c
                   <span className="text-ink-muted">{b.reason}</span>
                   <span className="ml-auto">
                     {b.source === "manual" ? (
-                      <ActionButton action={deleteBlockedRange.bind(null, b.id)} className="btn-ghost text-red-700" confirm="Да премахна ли блокировката?">Премахни</ActionButton>
+                      <ActionButton action={deleteBlockedRange.bind(null, b.id)} className="btn-ghost text-danger-700" confirm="Да премахна ли блокировката?">Премахни</ActionButton>
                     ) : (
-                      <span className="badge bg-violet-100 text-violet-800">от синхронизация</span>
+                      <span className="badge bg-external-100 text-external-800">от синхронизация</span>
                     )}
                   </span>
                 </li>

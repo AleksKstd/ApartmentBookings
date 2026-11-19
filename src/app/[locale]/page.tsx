@@ -29,7 +29,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       />
 
       <section className="section">
-        <div className="container grid items-start gap-12 lg:grid-cols-[1.2fr_1fr]">
+        <div className="container grid grid-cols-1 items-start gap-12 lg:grid-cols-[1.2fr_1fr]">
           <div>
             <p className="eyebrow mb-2">{pick(property.city, locale)}</p>
             <h2 className="text-3xl sm:text-4xl">{pick(homepage.introTitle, locale)}</h2>
@@ -51,7 +51,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         <section className="section bg-white">
           <div className="container">
             <SectionHeading title={t.home.highlightsTitle} />
-            <ul className="grid gap-6 md:grid-cols-3">
+            <ul className="grid grid-cols-1 gap-6 md:grid-cols-3">
               {homepage.highlights.map((h, i) => (
                 <li key={i} className="rounded-2xl bg-sand-100 p-6">
                   <Check className="h-6 w-6 text-clay-500" aria-hidden />
@@ -93,7 +93,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       </section>
 
       <section className="section">
-        <div className="container grid items-center gap-10 lg:grid-cols-2">
+        <div className="container grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
           <div>
             <SectionHeading title={pick(homepage.locationTitle, locale)} text={pick(homepage.locationText, locale)} />
             <p className="flex items-start gap-2 text-ink">

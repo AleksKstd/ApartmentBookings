@@ -26,7 +26,7 @@
     @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
   }
   .btn-primary {
-    @apply btn bg-clay-500 text-white hover:bg-clay-600;
+    @apply btn bg-clay-600 text-white hover:bg-clay-700;
   }
   .btn-secondary {
     @apply btn bg-sea-700 text-white hover:bg-sea-800;
@@ -38,13 +38,13 @@
     @apply btn text-sea-800 hover:bg-sea-50;
   }
   .btn-danger {
-    @apply btn bg-red-600 text-white hover:bg-red-700;
+    @apply btn bg-danger-600 text-white hover:bg-danger-700;
   }
   .card {
     @apply rounded-2xl bg-white shadow-card ring-1 ring-sea-900/5;
   }
   .input {
-    @apply block w-full rounded-xl border border-sand-300 bg-white px-3.5 py-2.5 text-base text-ink placeholder:text-ink-soft focus:border-sea-500 focus:outline-none focus:ring-2 focus:ring-sea-200 sm:text-sm;
+    @apply block w-full scroll-mt-24 rounded-xl border border-sand-400 bg-white px-3.5 py-2.5 text-base text-ink placeholder:text-ink-muted focus:border-sea-500 focus:outline-none focus:ring-2 focus:ring-sea-200 disabled:cursor-not-allowed disabled:bg-sand-100 aria-[invalid=true]:border-danger-600 sm:text-sm;
   }
   .label {
     @apply mb-1.5 block text-sm font-medium text-ink;
@@ -53,7 +53,7 @@
     @apply py-14 sm:py-20;
   }
   .eyebrow {
-    @apply text-xs font-semibold uppercase tracking-[0.18em] text-clay-600;
+    @apply text-xs font-semibold uppercase tracking-[0.18em] text-clay-700;
   }
   .carousel-btn {
     @apply grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/30;

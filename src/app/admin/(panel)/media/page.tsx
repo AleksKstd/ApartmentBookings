@@ -41,7 +41,7 @@ export default async function MediaPage() {
                   <ActionButton action={moveMedia.bind(null, m.id, -1)} className="btn-ghost px-2.5" title="Премести нагоре"><ArrowUp className="h-4 w-4" /></ActionButton>
                   <ActionButton action={moveMedia.bind(null, m.id, 1)} className="btn-ghost px-2.5" title="Премести надолу"><ArrowDown className="h-4 w-4" /></ActionButton>
                   <span className="ml-auto">
-                    <ActionButton action={deleteMediaItem.bind(null, m.id)} className="btn-ghost text-red-700" confirm="Да изтрия ли снимката окончателно?" title="Изтрий">
+                    <ActionButton action={deleteMediaItem.bind(null, m.id)} className="btn-ghost text-danger-700" confirm="Да изтрия ли снимката окончателно?" title="Изтрий">
                       <Trash2 className="h-4 w-4" /> Изтрий
                     </ActionButton>
                   </span>

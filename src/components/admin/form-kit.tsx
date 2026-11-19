@@ -12,7 +12,7 @@ export function ResultMessage({ result }: { result: ActionResult | null }) {
   return (
     <p
       role={result.ok ? "status" : "alert"}
-      className={cn("rounded-xl px-3 py-2 text-sm", result.ok ? "bg-green-50 text-green-800" : "bg-red-50 text-red-700")}
+      className={cn("rounded-xl px-3 py-2 text-sm", result.ok ? "bg-success-50 text-success-800" : "bg-danger-50 text-danger-700")}
     >
       {result.message}
     </p>
@@ -130,7 +130,7 @@ export function LocalizedField({
       <div className="grid gap-3 md:grid-cols-2">
         {(["bg", "en"] as const).map((lang) => (
           <div key={lang} className="relative">
-            <span className="pointer-events-none absolute right-3 top-2.5 text-[10px] font-bold uppercase text-ink-soft">{lang}</span>
+            <span className="pointer-events-none absolute right-3 top-2.5 text-[10px] font-bold uppercase text-ink-muted">{lang}</span>
             {multiline ? (
               <textarea name={`${name}.${lang}`} defaultValue={value[lang]} rows={rows} maxLength={maxLength} className="input pr-10" aria-label={`${label} (${lang})`} />
             ) : (

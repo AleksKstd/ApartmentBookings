@@ -27,7 +27,7 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/apa
   return (
     <>
       <section className="bg-white">
-        <div className="container grid gap-10 py-12 sm:py-16 lg:grid-cols-2 lg:items-center">
+        <div className="container grid grid-cols-1 gap-10 py-12 sm:py-16 lg:grid-cols-2 lg:items-center">
           <div>
             <p className="eyebrow mb-2">{pick(property.city, locale)}</p>
             <h1 className="text-4xl sm:text-5xl">{property.name}</h1>
@@ -52,7 +52,7 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/apa
         <div className="container space-y-14">
           <Facts property={property} pricing={pricing} t={t} />
 
-          <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr]">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.4fr_1fr]">
             <div>
               <SectionHeading title={t.apartment.aboutTitle} />
               <p className="whitespace-pre-line text-lg leading-relaxed text-ink-muted">{pick(property.description, locale)}</p>

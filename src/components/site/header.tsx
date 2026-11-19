@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Globe, Menu, X } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/lib/types";
@@ -11,11 +11,23 @@ import { cn } from "@/lib/utils";
 export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary["nav"]; siteName: string }) {
   const pathname = usePathname() ?? `/${locale}`;
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
+    if (!open) return;
+    // Focus the first link on open; Escape closes and returns focus to the toggle.
+    menuRef.current?.querySelector<HTMLElement>("a")?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      toggleRef.current?.focus();
+    };
+    document.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
+      document.removeEventListener("keydown", onKey);
     };
   }, [open]);
 
@@ -35,8 +47,8 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
 
   return (
     <header className="sticky top-0 z-40 border-b border-sea-900/5 bg-sand-50/90 backdrop-blur">
-      <div className="container flex h-16 items-center justify-between gap-4">
-        <Link href={`/${locale}`} className="font-serif text-xl font-semibold text-sea-800">
+      <div className="container flex min-h-16 items-center justify-between gap-4 py-2">
+        <Link href={`/${locale}`} className="min-w-0 font-serif text-xl font-semibold leading-tight text-sea-800">
           {siteName}
         </Link>
 
@@ -56,7 +68,7 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {/* Plain <a>: a full load re-renders the root layout so <html lang> and metadata follow the language. */}
           <a
             href={switchHref}
@@ -74,6 +86,7 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
             {t.bookNow}
           </Link>
           <button
+            ref={toggleRef}
             type="button"
             className="btn-ghost px-2.5 md:hidden"
             aria-expanded={open}
@@ -87,7 +100,7 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
       </div>
 
       {open && (
-        <nav id="mobile-menu" aria-label="Mobile" className="animate-fade-in border-t border-sea-900/5 bg-sand-50 md:hidden">
+        <nav ref={menuRef} id="mobile-menu" aria-label="Mobile" className="animate-fade-in border-t border-sea-900/5 bg-sand-50 md:hidden">
           <ul className="container flex flex-col py-3">
             {links.map((l) => (
               <li key={l.href}>

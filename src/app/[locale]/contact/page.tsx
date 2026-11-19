@@ -26,7 +26,7 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
       <div className="container max-w-3xl">
         <h1 className="text-4xl sm:text-5xl">{t.contact.title}</h1>
         <p className="mt-3 text-lg text-ink-muted">{t.contact.subtitle}</p>
-        <ul className="mt-10 grid gap-4">
+        <ul className="mt-10 grid grid-cols-1 gap-4">
           {items.map(({ icon: Icon, label, value, href }) => (
             <li key={label} className="card flex items-center gap-4 p-5">
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-sea-50 text-sea-700">
@@ -35,7 +35,7 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
               <div className="min-w-0">
                 <p className="text-sm text-ink-muted">{label}</p>
                 {href ? (
-                  <a href={href} className="break-words text-lg font-semibold text-sea-800 hover:underline" {...(href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+                  <a href={href} className="text-lg [overflow-wrap:anywhere] font-semibold text-sea-800 hover:underline" {...(href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
                     {value}
                   </a>
                 ) : (

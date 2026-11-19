@@ -6,7 +6,7 @@ import type { Locale, PropertyInfo } from "@/lib/types";
 export function Footer({ locale, t, property }: { locale: Locale; t: Dictionary; property: PropertyInfo }) {
   return (
     <footer className="mt-auto bg-sea-900 text-sea-100">
-      <div className="container grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="container grid grid-cols-1 gap-10 py-12 sm:grid-cols-2 lg:grid-cols-3">
         <div>
           <p className="font-serif text-2xl text-white">{property.name}</p>
           <p className="mt-2 text-sm text-sea-200">{t.footer.directBooking}</p>

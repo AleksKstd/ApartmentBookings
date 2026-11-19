@@ -113,7 +113,7 @@ export function AvailabilityCalendar({
               <h3 className="mb-3 text-center font-sans text-base font-semibold capitalize text-sea-900" aria-live="polite">
                 {monthFmt.format(parseDay(m))}
               </h3>
-              <div className="grid grid-cols-7 text-center text-xs font-medium uppercase text-ink-soft" aria-hidden>
+              <div className="grid grid-cols-7 text-center text-xs font-medium uppercase text-ink-muted" aria-hidden>
                 {weekdayNames.map((w) => (
                   <div key={w} className="py-1">{w}</div>
                 ))}
