@@ -10,6 +10,7 @@ import { buildIcal } from "@/lib/ical";
 import { publicContact, shown } from "@/lib/placeholder";
 import { formatMoney } from "@/lib/pricing";
 import { getSiteData } from "@/lib/site";
+import { langFor } from "@/lib/utils";
 import { tokenMatches } from "@/lib/tokens";
 import { retryBooking } from "./actions";
 
@@ -176,11 +177,11 @@ export default async function ConfirmationPage({ params, searchParams }: PagePro
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-clay-500" aria-hidden />
               {property.mapUrl ? (
                 <a href={property.mapUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-sea-800">
-                  {contact.address}
+                  <span lang={langFor(contact.address)}>{contact.address}</span>
                   <span className="sr-only"> ({t.common.opensInNewTab})</span>
                 </a>
               ) : (
-                contact.address
+                <span lang={langFor(contact.address)}>{contact.address}</span>
               )}
             </p>
           )}

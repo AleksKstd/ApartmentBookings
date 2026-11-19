@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-test("root redirects by Accept-Language, defaulting to Bulgarian", async ({ browser, baseURL }) => {
+test("root defaults to Bulgarian whatever the browser language", async ({ browser, baseURL }) => {
   for (const [locale, expected, lang] of [
     ["bg-BG", /\/bg$/, "bg-BG"],
-    ["en-US", /\/en$/, "en-GB"],
+    ["en-US", /\/bg$/, "bg-BG"],
     ["de-DE", /\/bg$/, "bg-BG"],
   ] as const) {
     const ctx = await browser.newContext({ locale, baseURL });
@@ -33,12 +33,19 @@ test("homepage shows the carousel, facts and gallery", async ({ page }) => {
 
 test("language switch keeps the current page", async ({ page }) => {
   await page.goto("/bg/apartment");
-  await page.getByRole("link", { name: /English/ }).click();
+  const header = page.getByRole("banner");
+  await expect(header.getByRole("link", { name: "Български" })).toHaveAttribute("aria-current", "true");
+  await header.getByRole("link", { name: "English" }).click();
   await expect(page).toHaveURL(/\/en\/apartment$/);
   await expect(page.getByRole("heading", { name: "About the apartment" })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("lang", "en-GB");
-  await page.getByRole("link", { name: /Български/ }).click();
+  await page.getByRole("contentinfo").getByRole("link", { name: "Български" }).click();
   await expect(page).toHaveURL(/\/bg\/apartment$/);
+
+  // The choice is remembered: after choosing English, the root opens in English
+  await page.getByRole("banner").getByRole("link", { name: "English" }).click();
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/en$/);
 });
 
 test("gallery lightbox opens, navigates and closes with Escape", async ({ page }) => {

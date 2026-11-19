@@ -5,6 +5,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import { getDictionary, isLocale, pick } from "@/i18n";
 import { publicContact, shown } from "@/lib/placeholder";
 import { getSiteData } from "@/lib/site";
+import { langFor } from "@/lib/utils";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/contact">): Promise<Metadata> {
   const { locale } = await params;
@@ -38,11 +39,11 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
               <div className="min-w-0">
                 <p className="text-sm text-ink-muted">{label}</p>
                 {href ? (
-                  <a href={href} className="text-lg [overflow-wrap:anywhere] font-semibold text-sea-800 hover:underline" {...(href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+                  <a href={href} lang={langFor(value)} className="text-lg [overflow-wrap:anywhere] font-semibold text-sea-800 hover:underline" {...(href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
                     {value}
                   </a>
                 ) : (
-                  <p className="text-lg font-semibold">{value}</p>
+                  <p lang={langFor(value)} className="text-lg font-semibold">{value}</p>
                 )}
               </div>
             </li>

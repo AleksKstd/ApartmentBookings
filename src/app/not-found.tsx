@@ -8,6 +8,7 @@ export default async function NotFound() {
   const t = getDictionary(locale);
   return (
     <main className="grid flex-1 place-items-center px-4 py-24 text-center">
+      <title>{t.notFound.title}</title>
       <div>
         <p className="font-display text-7xl text-sea-200">404</p>
         <h1 className="mt-4 text-3xl">{t.notFound.title}</h1>

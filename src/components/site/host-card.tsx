@@ -1,6 +1,7 @@
 import { pick } from "@/i18n";
 import { shown } from "@/lib/placeholder";
 import type { Locale, PropertyInfo } from "@/lib/types";
+import { langFor } from "@/lib/utils";
 
 /** The host, introduced by a name plate. Renders nothing until the host's name is filled in (except in demo). */
 export function HostCard({ property, locale, demo }: { property: PropertyInfo; locale: Locale; demo: boolean }) {
@@ -16,7 +17,7 @@ export function HostCard({ property, locale, demo }: { property: PropertyInfo; l
       )}
       <div className="max-w-prose">
         <h2 id="host-title" className="plate inline-block text-white">
-          <span className="plate-face block px-5 py-2.5 text-3xl sm:text-4xl">{name}</span>
+          <span lang={langFor(name)} className="plate-face block px-5 py-2.5 text-3xl sm:text-4xl">{name}</span>
         </h2>
         {bio && <p className="mt-5 text-xl leading-relaxed text-ink">{bio}</p>}
         {reply && <p className="mt-3 text-ink-muted">{reply}</p>}

@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Globe, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { LanguageSwitch } from "./language-switch";
 
 export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary["nav"]; siteName: string }) {
   const pathname = usePathname() ?? `/${locale}`;
@@ -31,8 +32,6 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
     };
   }, [open]);
 
-  const otherLocale: Locale = locale === "bg" ? "en" : "bg";
-  const switchHref = `/${otherLocale}${pathname.replace(/^\/(bg|en)(?=\/|$)/, "")}`;
   const links = [
     { href: `/${locale}`, label: t.home },
     { href: `/${locale}/apartment`, label: t.apartment },
@@ -41,19 +40,15 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
   ];
   const isActive = (href: string) => (href === `/${locale}` ? pathname === href : pathname.startsWith(href));
 
-  const rememberLocale = () => {
-    document.cookie = `NEXT_LOCALE=${otherLocale}; path=/; max-age=31536000; samesite=lax`;
-  };
-
   return (
     <header className="sticky top-0 z-40 border-b border-sea-900/10 bg-sand-50/95 backdrop-blur">
       <div className="container flex min-h-16 items-center justify-between gap-4 py-2">
         {/* The name on its own small enamel plate. */}
-        <Link href={`/${locale}`} className="plate min-w-0 shrink">
+        <Link href={`/${locale}`} className="plate min-w-0 shrink sm:whitespace-nowrap">
           <span className="plate-face block px-4 py-2 font-display text-xl font-extrabold leading-tight sm:text-2xl">{siteName}</span>
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
+        <nav aria-label={t.mainLabel} className="hidden items-center gap-1 lg:flex">
           {links.map((l) => (
             <Link
               key={l.href}
@@ -70,26 +65,14 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
         </nav>
 
         <div className="flex shrink-0 items-center gap-2">
-          {/* Plain <a>: a full load re-renders the root layout so <html lang> and metadata follow the language. */}
-          <a
-            href={switchHref}
-            onClick={rememberLocale}
-            hrefLang={otherLocale}
-            lang={otherLocale}
-            className="btn-ghost px-3"
-            aria-label={`${t.language}: ${t.switchTo}`}
-          >
-            <Globe className="h-4 w-4" aria-hidden />
-            <span className="hidden sm:inline">{t.switchTo}</span>
-            <span className="sm:hidden">{otherLocale.toUpperCase()}</span>
-          </a>
+          <LanguageSwitch locale={locale} t={t} />
           <Link href={`/${locale}/booking`} className="btn-primary hidden sm:inline-flex">
             {t.bookNow}
           </Link>
           <button
             ref={toggleRef}
             type="button"
-            className="btn-ghost px-2.5 md:hidden"
+            className="btn-ghost px-2.5 lg:hidden"
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? t.closeMenu : t.openMenu}
@@ -101,7 +84,7 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
       </div>
 
       {open && (
-        <nav ref={menuRef} id="mobile-menu" aria-label="Mobile" className="animate-fade-in border-t border-sea-900/5 bg-sand-50 md:hidden">
+        <nav ref={menuRef} id="mobile-menu" aria-label={t.mobileLabel} className="animate-fade-in border-t border-sea-900/5 bg-sand-50 lg:hidden">
           <ul className="container flex flex-col py-3">
             {links.map((l) => (
               <li key={l.href}>

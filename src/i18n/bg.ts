@@ -22,6 +22,11 @@ const bg = {
     language: "Език",
     switchTo: "English",
     skipToContent: "Към съдържанието",
+    mainLabel: "Основна навигация",
+    mobileLabel: "Мобилно меню",
+    footerLabel: "Навигация в долната част",
+    bulgarian: "Български",
+    english: "English",
   },
   common: {
     guests: "Гости",

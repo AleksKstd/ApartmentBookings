@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
   return {
     title: { default: `${property.name} — ${pick(property.tagline, locale)}`, template: `%s · ${property.name}` },
     description: t.meta.siteDescription,
-    alternates: { languages: Object.fromEntries(LOCALES.map((l) => [l, `/${l}`])) },
+    alternates: { languages: { ...Object.fromEntries(LOCALES.map((l) => [l, `/${l}`])), "x-default": "/bg" } },
     openGraph: { siteName: property.name, locale: locale === "bg" ? "bg_BG" : "en_GB", type: "website" },
   };
 }

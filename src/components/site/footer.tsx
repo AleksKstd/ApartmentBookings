@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import type { Dictionary } from "@/i18n";
 import { publicContact } from "@/lib/placeholder";
+import { LanguageSwitch } from "./language-switch";
+import { langFor } from "@/lib/utils";
 import type { Locale, PropertyInfo } from "@/lib/types";
 
 export function Footer({ locale, t, property, demo }: { locale: Locale; t: Dictionary; property: PropertyInfo; demo: boolean }) {
@@ -17,7 +19,7 @@ export function Footer({ locale, t, property, demo }: { locale: Locale; t: Dicti
           {contact.address && (
             <li className="flex gap-3">
               <MapPin className="h-5 w-5 shrink-0 text-clay-400" aria-hidden />
-              <span>{contact.address}</span>
+              <span lang={langFor(contact.address)}>{contact.address}</span>
             </li>
           )}
           {contact.email && (
@@ -37,7 +39,7 @@ export function Footer({ locale, t, property, demo }: { locale: Locale; t: Dicti
             </li>
           )}
         </ul>
-        <nav aria-label="Footer" className="flex flex-col gap-2 text-sm">
+        <nav aria-label={t.nav.footerLabel} className="flex flex-col gap-2 text-sm">
           <Link href={`/${locale}/apartment`} className="hover:text-white">{t.nav.apartment}</Link>
           <Link href={`/${locale}/gallery`} className="hover:text-white">{t.nav.gallery}</Link>
           <Link href={`/${locale}/booking`} className="hover:text-white">{t.nav.booking}</Link>
@@ -46,9 +48,12 @@ export function Footer({ locale, t, property, demo }: { locale: Locale; t: Dicti
         </nav>
       </div>
       <div className="border-t border-white/10">
-        <p className="container py-5 text-xs text-sea-200">
-          © {new Date().getFullYear()} {property.name}. {t.footer.rights}
-        </p>
+        <div className="container flex flex-wrap items-center justify-between gap-4 py-5">
+          <p className="text-xs text-sea-200">
+            © {new Date().getFullYear()} {property.name}. {t.footer.rights}
+          </p>
+          <LanguageSwitch locale={locale} t={t.nav} tone="dark" />
+        </div>
       </div>
     </footer>
   );

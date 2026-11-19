@@ -4,19 +4,11 @@ import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 const LOCALES = ["bg", "en"] as const;
 export const LOCALE_COOKIE = "NEXT_LOCALE";
 
+/** Bulgarian is the default; a visitor who picked a language keeps it (cookie set by the language switch). */
 function preferredLocale(request: NextRequest): string {
   const cookie = request.cookies.get(LOCALE_COOKIE)?.value;
   if (cookie && (LOCALES as readonly string[]).includes(cookie)) return cookie;
-  const accept = request.headers.get("accept-language") ?? "";
-  const ranked = accept
-    .split(",")
-    .map((part) => {
-      const [tag, q] = part.trim().split(";q=");
-      return { lang: tag.toLowerCase().slice(0, 2), q: q ? Number(q) : 1 };
-    })
-    .sort((a, b) => b.q - a.q);
-  const match = ranked.find((r) => (LOCALES as readonly string[]).includes(r.lang));
-  return match?.lang ?? "bg";
+  return "bg";
 }
 
 export async function proxy(request: NextRequest) {

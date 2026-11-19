@@ -23,6 +23,11 @@ const en: Dictionary = {
     language: "Language",
     switchTo: "Български",
     skipToContent: "Skip to content",
+    mainLabel: "Main",
+    mobileLabel: "Mobile menu",
+    footerLabel: "Footer",
+    bulgarian: "Български",
+    english: "English",
   },
   common: {
     guests: "Guests",

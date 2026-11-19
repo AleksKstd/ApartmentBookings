@@ -7,7 +7,7 @@ import { submitBooking, type BookingFormState } from "@/app/[locale]/booking/act
 import { fmt, type Dictionary } from "@/i18n";
 import { formatMoney } from "@/lib/pricing";
 import type { Locale, PriceQuote } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, langFor } from "@/lib/utils";
 import { AvailabilityCalendar } from "./availability-calendar";
 
 /** Host and terms shown beside the form. Null fields are unfilled placeholders and are left out. */
@@ -258,12 +258,20 @@ export function BookingWidget(props: Props) {
                   // eslint-disable-next-line @next/next/no-img-element -- admin-uploaded images from storage
                   <img src={trust.hostPhotoUrl} alt="" className="h-14 w-14 shrink-0 rounded-full object-cover" />
                 ) : (
-                  <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-sea-100 font-display text-lg text-sea-800" aria-hidden>{initials}</span>
+                  <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-sea-100 font-display text-lg font-bold text-sea-800" aria-hidden lang={langFor(initials)}>{initials}</span>
                 )
               )}
               <div>
                 <h2 id="trust-title" className="text-xl">
-                  {trust.hostName ? fmt(t.booking.trustTitle, { name: trust.hostName }) : t.booking.trustTitleNoHost}
+                  {trust.hostName ? (
+                    <>
+                      {t.booking.trustTitle.split("{name}")[0]}
+                      <span lang={langFor(trust.hostName)}>{trust.hostName}</span>
+                      {t.booking.trustTitle.split("{name}")[1]}
+                    </>
+                  ) : (
+                    t.booking.trustTitleNoHost
+                  )}
                 </h2>
                 {trust.replyTime && <p className="mt-0.5 text-sm text-ink-muted">{trust.replyTime}</p>}
               </div>
