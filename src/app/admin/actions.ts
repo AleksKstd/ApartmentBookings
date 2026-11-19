@@ -478,6 +478,7 @@ export async function saveHomepage(_prev: ActionResult | null, formData: FormDat
       heroSubtitle: localized(formData, "heroSubtitle", 300),
       introTitle: localized(formData, "introTitle", 120),
       introText: localized(formData, "introText", 3000),
+      streetSign: { name: str(formData, "streetSign.name", 60), latin: str(formData, "streetSign.latin", 60), note: localized(formData, "streetSign.note", 200) },
       nearby,
       locationTitle: localized(formData, "locationTitle", 120),
       locationText: localized(formData, "locationText", 1000),

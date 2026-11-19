@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDictionary, isLocale } from "@/i18n";
+import { publicContact } from "@/lib/placeholder";
 import { getSiteData } from "@/lib/site";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/privacy">): Promise<Metadata> {
@@ -12,7 +13,8 @@ export default async function PrivacyPage({ params }: PageProps<"/[locale]/priva
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getDictionary(locale);
-  const { property } = await getSiteData();
+  const { property, demo } = await getSiteData();
+  const { email } = publicContact(property, demo);
   return (
     <section className="section">
       <div className="container max-w-3xl space-y-5">
@@ -21,7 +23,13 @@ export default async function PrivacyPage({ params }: PageProps<"/[locale]/priva
           <p key={p} className="leading-relaxed text-ink-muted">{p}</p>
         ))}
         <p className="font-semibold">
-          {property.name} · <a className="text-sea-700 underline" href={`mailto:${property.contactEmail}`}>{property.contactEmail}</a>
+          {property.name}
+          {email && (
+            <>
+              {" · "}
+              <a className="text-sea-700 underline" href={`mailto:${email}`}>{email}</a>
+            </>
+          )}
         </p>
       </div>
     </section>

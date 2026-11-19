@@ -22,8 +22,7 @@ test("homepage shows the carousel, facts and gallery", async ({ page }) => {
   await expect(carousel).toBeVisible();
   await expect(carousel.locator('[aria-roledescription="slide"]')).toHaveCount(4);
 
-  // Manual navigation moves to the next slide
-  await page.getByRole("button", { name: "Пауза" }).click();
+  // The band moves only on request: the next button shows slide 2
   await page.getByRole("button", { name: "Следваща снимка" }).click();
   await expect(carousel.locator('[aria-roledescription="slide"][aria-hidden="false"]')).toHaveAttribute("aria-label", "Снимка 2 от 4");
 

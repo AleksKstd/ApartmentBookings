@@ -4,7 +4,7 @@ import { PageHeader, Panel } from "@/components/admin/ui";
 import bg from "@/i18n/bg";
 import { getRepository } from "@/lib/data";
 import { AMENITY_KEYS } from "@/lib/data/defaults";
-import { isPlaceholder } from "@/lib/placeholder";
+import { isPlaceholder, isStarterContact } from "@/lib/placeholder";
 
 export const metadata = { title: "Съдържание" };
 
@@ -24,6 +24,9 @@ export default async function ContentPage() {
     both(p.replyTime) && "време за отговор",
     both(p.cancellationPolicy) && "условия за анулиране",
     h.nearby.some((n) => both(n.distance)) && "разстояния до места наблизо",
+    isStarterContact("address", p.address) && "адрес",
+    isStarterContact("contactEmail", p.contactEmail) && "имейл за контакт",
+    isStarterContact("contactPhone", p.contactPhone) && "телефон за контакт",
   ].filter(Boolean);
 
   return (
@@ -31,7 +34,7 @@ export default async function ContentPage() {
       <PageHeader title="Съдържание" description="Текстовете се показват на двата езика. Ако английският превод липсва, се показва българският." />
       {todo.length > 0 && (
         <p className="mb-6 rounded-xl bg-warning-50 p-4 text-sm text-warning-800" role="note">
-          <strong>Попълнете примерните текстове.</strong> Полетата в [квадратни скоби] са примерни и не се показват на сайта,
+          <strong>Попълнете примерните данни.</strong> Полетата в [квадратни скоби] и примерните адрес, имейл и телефон не се показват на сайта,
           докато не ги замените: {todo.join(", ")}.
         </p>
       )}
@@ -64,6 +67,14 @@ export default async function ContentPage() {
             <LocalizedField label="Подзаглавие" name="heroSubtitle" value={h.heroSubtitle} maxLength={300} />
             <LocalizedField label="Въведение — заглавие" name="introTitle" value={h.introTitle} maxLength={120} />
             <LocalizedField label="Въведение — текст" name="introText" value={h.introText} multiline rows={5} maxLength={3000} />
+            <fieldset className="space-y-4 rounded-2xl border border-sand-200 p-4">
+              <legend className="px-2 font-semibold">Уличната табела до заглавието</legend>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Текст на табелата (празно = скрита)" name="streetSign.name" defaultValue={h.streetSign.name} maxLength={60} hint="напр. бул. „Богориди“" />
+                <Field label="Втори ред на латиница" name="streetSign.latin" defaultValue={h.streetSign.latin} maxLength={60} hint="напр. Bogoridi Blvd" />
+              </div>
+              <LocalizedField label="Бележка под табелата" name="streetSign.note" value={h.streetSign.note} maxLength={200} />
+            </fieldset>
             <fieldset className="space-y-4 rounded-2xl border border-sand-200 p-4">
               <legend className="px-2 font-semibold">Наблизо (разстояния от входа)</legend>
               <input type="hidden" name="nearbyCount" value={nearby.length} />

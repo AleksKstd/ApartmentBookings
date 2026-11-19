@@ -66,6 +66,8 @@ export interface HomepageContent {
   heroSubtitle: Localized;
   introTitle: Localized;
   introText: Localized;
+  /** The street sign by the headline: the street the house stands on or next to. Empty name hides it. */
+  streetSign: { name: string; latin: string; note: Localized };
   /** "From the door": nearby places and how far they are. */
   nearby: { place: Localized; distance: Localized }[];
   locationTitle: Localized;

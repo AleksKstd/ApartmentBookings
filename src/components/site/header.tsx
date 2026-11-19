@@ -46,10 +46,11 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-sea-900/5 bg-sand-50/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-sea-900/10 bg-sand-50/95 backdrop-blur">
       <div className="container flex min-h-16 items-center justify-between gap-4 py-2">
-        <Link href={`/${locale}`} className="min-w-0 font-serif text-xl font-semibold leading-tight text-sea-800">
-          {siteName}
+        {/* The name on its own small enamel plate. */}
+        <Link href={`/${locale}`} className="plate min-w-0 shrink">
+          <span className="plate-face block px-4 py-2 font-display text-xl font-extrabold leading-tight sm:text-2xl">{siteName}</span>
         </Link>
 
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
@@ -59,8 +60,8 @@ export function Header({ locale, t, siteName }: { locale: Locale; t: Dictionary[
               href={l.href}
               aria-current={isActive(l.href) ? "page" : undefined}
               className={cn(
-                "rounded-full px-3 py-2 text-sm font-medium text-ink-muted hover:text-sea-800",
-                isActive(l.href) && "text-sea-800",
+                "rounded-md px-3 py-2 text-[0.9375rem] font-semibold text-ink-muted underline-offset-[6px] hover:text-sea-700",
+                isActive(l.href) && "text-sea-700 underline decoration-2",
               )}
             >
               {l.label}

@@ -258,7 +258,7 @@ export function BookingWidget(props: Props) {
                   // eslint-disable-next-line @next/next/no-img-element -- admin-uploaded images from storage
                   <img src={trust.hostPhotoUrl} alt="" className="h-14 w-14 shrink-0 rounded-full object-cover" />
                 ) : (
-                  <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-sea-100 font-serif text-lg text-sea-800" aria-hidden>{initials}</span>
+                  <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-sea-100 font-display text-lg text-sea-800" aria-hidden>{initials}</span>
                 )
               )}
               <div>

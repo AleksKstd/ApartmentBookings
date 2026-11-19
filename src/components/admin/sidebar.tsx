@@ -75,7 +75,7 @@ export function AdminSidebar({ siteName, pendingCount, demo }: { siteName: strin
   return (
     <>
       <div className="flex items-center justify-between bg-sea-900 px-4 py-3 text-white lg:hidden">
-        <span className="font-serif text-lg">{siteName}</span>
+        <span className="font-display text-lg">{siteName}</span>
         <button ref={toggleRef} type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="admin-sidebar" aria-label={open ? "Затвори менюто" : "Отвори менюто"} className="rounded-lg p-2 hover:bg-white/10">
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -91,7 +91,7 @@ export function AdminSidebar({ siteName, pendingCount, demo }: { siteName: strin
         )}
       >
         <div>
-          <p className="font-serif text-xl text-white">{siteName}</p>
+          <p className="font-display text-xl text-white">{siteName}</p>
           <p className="text-xs text-sea-200">Администрация{demo ? " · демо" : ""}</p>
         </div>
         {nav}

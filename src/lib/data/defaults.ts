@@ -74,16 +74,21 @@ export const DEFAULT_SETTINGS: SiteSettings = {
       bg: "Морски бриз е уютен апартамент в центъра на Бургас, обзаведен с внимание към детайла. Събуждайте се с изгледа към залива, разходете се през Морската градина до плажа и се върнете в спокойна, светла обстановка.",
       en: "Morski Briz is a cosy apartment in the centre of Burgas, furnished with attention to detail. Wake up to views of the bay, walk through the Sea Garden to the beach and come back to a calm, bright space.",
     },
+    streetSign: {
+      name: "бул. „Богориди“",
+      latin: "Bogoridi Blvd",
+      note: { bg: "Точно до къщата — главната пешеходна улица на Бургас.", en: "Right next to the house — the main pedestrian street of Burgas." },
+    },
     nearby: [
-      { place: { bg: "Морската градина", en: "The Sea Garden" }, distance: { bg: "[5 мин пеша]", en: "[5 min walk]" } },
+      { place: { bg: "Морската градина", en: "Sea Garden" }, distance: { bg: "[5 мин пеша]", en: "[5 min walk]" } },
       { place: { bg: "Централен плаж", en: "Central Beach" }, distance: { bg: "[8 мин пеша]", en: "[8 min walk]" } },
-      { place: { bg: "бул. „Богориди“", en: "Bogoridi Boulevard" }, distance: { bg: "[4 мин пеша]", en: "[4 min walk]" } },
-      { place: { bg: "Гара Бургас", en: "Burgas railway station" }, distance: { bg: "[12 мин пеша]", en: "[12 min walk]" } },
+      { place: { bg: "бул. „Богориди“", en: "Bogoridi Blvd" }, distance: { bg: "[1 мин пеша]", en: "[1 min walk]" } },
+      { place: { bg: "Гара Бургас", en: "Railway station" }, distance: { bg: "[12 мин пеша]", en: "[12 min walk]" } },
     ],
     locationTitle: { bg: "В центъра на Бургас", en: "In the centre of Burgas" },
     locationText: {
-      bg: "На тиха улица в центъра — ресторанти, магазини и катедралата „Св. св. Кирил и Методий“ са на пешеходно разстояние.",
-      en: "On a quiet street in the centre — restaurants, shops and the Cathedral of Saints Cyril and Methodius are all within walking distance.",
+      bg: "В къща точно до бул. „Богориди“ — ресторанти, магазини, Морската градина и катедралата „Св. св. Кирил и Методий“ са на пешеходно разстояние.",
+      en: "In a house right next to Bogoridi Boulevard — restaurants, shops, the Sea Garden and the Cathedral of Saints Cyril and Methodius are all within walking distance.",
     },
     ctaTitle: { bg: "Изберете вашите дати", en: "Choose your dates" },
     ctaText: {

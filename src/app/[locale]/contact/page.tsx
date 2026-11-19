@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { getDictionary, isLocale, pick } from "@/i18n";
-import { shown } from "@/lib/placeholder";
+import { publicContact, shown } from "@/lib/placeholder";
 import { getSiteData } from "@/lib/site";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/contact">): Promise<Metadata> {
@@ -17,21 +17,22 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
   const t = getDictionary(locale);
   const { property, demo } = await getSiteData();
   const replyTime = shown(pick(property.replyTime, locale), demo) ?? t.contact.responseTime;
+  const contact = publicContact(property, demo);
   const items = [
-    { icon: Mail, label: t.common.email, value: property.contactEmail, href: `mailto:${property.contactEmail}` },
-    { icon: Phone, label: t.common.phone, value: property.contactPhone, href: `tel:${property.contactPhone.replace(/\s/g, "")}` },
-    { icon: MapPin, label: t.common.address, value: property.address, href: property.mapUrl || undefined },
-  ];
+    contact.email && { icon: Mail, label: t.common.email, value: contact.email, href: `mailto:${contact.email}` },
+    contact.phone && { icon: Phone, label: t.common.phone, value: contact.phone, href: `tel:${contact.phone.replace(/\s/g, "")}` },
+    contact.address && { icon: MapPin, label: t.common.address, value: contact.address, href: property.mapUrl || undefined },
+  ].filter((item): item is { icon: typeof Mail; label: string; value: string; href: string | undefined } => Boolean(item));
 
   return (
     <section className="section">
       <div className="container max-w-3xl">
         <h1 className="text-4xl sm:text-5xl">{t.contact.title}</h1>
         <p className="mt-3 text-lg text-ink-muted">{t.contact.subtitle}</p>
-        <ul className="mt-10 grid grid-cols-1 gap-4">
+        <ul className="mt-10 grid grid-cols-1 border-t-2 border-sea-700">
           {items.map(({ icon: Icon, label, value, href }) => (
-            <li key={label} className="card flex items-center gap-4 p-5">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-sea-50 text-sea-700">
+            <li key={label} className="flex items-center gap-4 border-b border-sand-300 py-5">
+              <span className="plate grid h-12 w-12 shrink-0 place-items-center">
                 <Icon className="h-5 w-5" aria-hidden />
               </span>
               <div className="min-w-0">

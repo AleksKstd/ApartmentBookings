@@ -1,15 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MapPin } from "lucide-react";
+import { AddressPlate } from "@/components/site/address-plate";
 import { AmenityList } from "@/components/site/amenity-list";
 import { FactLine } from "@/components/site/facts";
 import { Gallery } from "@/components/site/gallery";
 import { HeroCarousel } from "@/components/site/hero-carousel";
 import { HostCard } from "@/components/site/host-card";
 import { Nearby } from "@/components/site/nearby";
+import { SearchPlate } from "@/components/site/search-plate";
 import { SectionHeading } from "@/components/site/section-heading";
+import { StreetSign } from "@/components/site/street-sign";
 import { getDictionary, isLocale, pick } from "@/i18n";
-import { shown } from "@/lib/placeholder";
+import { todayAtProperty } from "@/lib/dates";
+import { publicContact, shown } from "@/lib/placeholder";
 import { formatMoney } from "@/lib/pricing";
 import { getSiteData } from "@/lib/site";
 
@@ -18,30 +21,40 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   if (!isLocale(locale)) notFound();
   const t = getDictionary(locale);
   const { property, homepage, pricing, carousel, gallery, lowestNightly, demo } = await getSiteData();
+  const contact = publicContact(property, demo);
   const slides = (carousel.length ? carousel : gallery.slice(0, 1)).map((m) => ({ id: m.id, url: m.url, alt: pick(m.alt, locale) }));
 
   return (
     <>
-      <HeroCarousel
-        slides={slides}
-        title={pick(homepage.heroTitle, locale)}
-        subtitle={pick(homepage.heroSubtitle, locale)}
-        primaryCta={{ href: `/${locale}/booking`, label: t.common.checkAvailability }}
-        secondaryCta={{ href: `/${locale}/apartment`, label: t.common.learnMore }}
-        t={t.carousel}
-      />
+      {/* The opening: headline and the street sign, then the search as the primary action. */}
+      <section className="container pb-14 pt-10 sm:pb-20 sm:pt-14" aria-labelledby="home-title">
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1fr_auto] lg:gap-12">
+          <div>
+            <h1 id="home-title" className="max-w-[11ch] text-[clamp(2.75rem,7.2vw,6.25rem)]">{pick(homepage.heroTitle, locale)}</h1>
+            <p className="mt-5 max-w-[38ch] text-xl text-ink-muted">{pick(homepage.heroSubtitle, locale)}</p>
+          </div>
+          <StreetSign sign={homepage.streetSign} note={pick(homepage.streetSign.note, locale)} />
+        </div>
+        <div className="mt-10">
+          <SearchPlate locale={locale} t={t} today={todayAtProperty()} maxGuests={pricing.maxGuests} />
+        </div>
+        <p className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-ink-muted">
+          <span>
+            {t.apartment.pricesFrom} <b className="font-semibold tabular-nums text-ink">{formatMoney(lowestNightly, pricing.currency, locale)}</b> / {t.common.night}
+          </span>
+          <span>{t.home.eventsNote}</span>
+        </p>
+        <div className="mt-10">
+          <HeroCarousel slides={slides} t={t.carousel} />
+        </div>
+      </section>
 
       <section className="section">
         <div className="container">
           <div className="max-w-3xl">
-            <h2 className="text-3xl sm:text-4xl">{pick(homepage.introTitle, locale)}</h2>
+            <h2 className="text-4xl sm:text-5xl">{pick(homepage.introTitle, locale)}</h2>
             <p className="mt-5 max-w-prose whitespace-pre-line text-lg leading-relaxed text-ink-muted">{pick(homepage.introText, locale)}</p>
-            <FactLine property={property} pricing={pricing} t={t} className="mt-6" />
-            <p className="mt-6 text-sea-800">
-              <span className="text-sm text-ink-muted">{t.apartment.pricesFrom} </span>
-              <span className="text-2xl font-semibold tabular-nums">{formatMoney(lowestNightly, pricing.currency, locale)}</span>
-              <span className="text-sm text-ink-muted"> / {t.common.night}</span>
-            </p>
+            <FactLine property={property} pricing={pricing} t={t} className="mt-6 text-lg" />
           </div>
         </div>
       </section>
@@ -51,11 +64,11 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         locale={locale}
         demo={demo}
         title={t.home.nearbyTitle}
-        startLabel={t.home.nearbyStart}
+        note={t.home.nearbyNote}
         exampleNote={t.home.nearbyExample}
       />
 
-      <section className="section bg-white">
+      <section className="section">
         <div className="container">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <SectionHeading title={t.home.galleryTitle} />
@@ -84,9 +97,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       </section>
 
       {shown(property.hostName, demo) && (
-        <div className="section bg-white">
+        <div className="section">
           <div className="container">
-            <HostCard property={property} locale={locale} demo={demo} title={t.home.hostTitle} />
+            <HostCard property={property} locale={locale} demo={demo} />
           </div>
         </div>
       )}
@@ -95,23 +108,18 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         <div className="container grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
           <div>
             <SectionHeading title={pick(homepage.locationTitle, locale)} text={pick(homepage.locationText, locale)} />
-            <p className="flex items-start gap-2 text-ink">
-              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-clay-500" aria-hidden />
-              {property.address}
-            </p>
-            {property.mapUrl && (
-              <a href={property.mapUrl} target="_blank" rel="noopener noreferrer" className="btn-outline mt-6">
-                {t.common.openMap}
-                <span className="sr-only"> ({t.common.opensInNewTab})</span>
-              </a>
+            {contact.address && (
+              <AddressPlate address={contact.address} href={property.mapUrl || undefined} label={t.common.openMap} newTab={t.common.opensInNewTab} />
             )}
           </div>
-          <div className="rounded-3xl bg-sea-700 p-8 text-white sm:p-12">
-            <h2 className="text-3xl text-white">{pick(homepage.ctaTitle, locale)}</h2>
-            <p className="mt-3 text-sea-100">{pick(homepage.ctaText, locale)}</p>
-            <Link href={`/${locale}/booking`} className="btn-primary mt-8 px-6 py-3 text-base">
-              {t.common.checkAvailability}
-            </Link>
+          <div className="plate">
+            <div className="plate-face p-8 sm:p-12">
+              <h2 className="text-4xl text-white sm:text-5xl">{pick(homepage.ctaTitle, locale)}</h2>
+              <p className="mt-3 text-lg text-sea-100">{pick(homepage.ctaText, locale)}</p>
+              <Link href={`/${locale}/booking`} className="btn mt-8 bg-white px-6 py-3 text-lg text-sea-700 hover:bg-sea-50">
+                {t.common.checkAvailability} <span aria-hidden>→</span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>

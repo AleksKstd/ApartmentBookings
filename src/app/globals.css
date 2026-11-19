@@ -10,8 +10,12 @@
   body {
     @apply bg-sand-50 font-sans text-ink antialiased;
   }
-  h1, h2, h3 {
-    @apply font-serif font-medium tracking-tight text-sea-900;
+  h1, h2 {
+    @apply font-display font-extrabold leading-[0.95] text-sea-700;
+    text-wrap: balance;
+  }
+  h3 {
+    @apply font-display font-bold text-sea-800;
     text-wrap: balance;
   }
   p, li, dd {
@@ -26,29 +30,43 @@
 }
 
 @layer components {
+  /* Actions are enamel plates: cobalt face, white inset rule, small rounded corners. */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 font-display text-base font-bold leading-tight transition-colors disabled:cursor-not-allowed disabled:opacity-60;
   }
   .btn-primary {
-    @apply btn bg-clay-600 text-white hover:bg-clay-700;
+    @apply btn bg-sea-700 text-white shadow-[inset_0_0_0_3px_theme(colors.sea.700),inset_0_0_0_5px_#fff] hover:bg-sea-800 hover:shadow-[inset_0_0_0_3px_theme(colors.sea.800),inset_0_0_0_5px_#fff];
   }
   .btn-secondary {
-    @apply btn bg-sea-700 text-white hover:bg-sea-800;
+    @apply btn-primary;
   }
   .btn-outline {
-    @apply btn border border-sea-700/30 bg-white text-sea-800 hover:border-sea-700 hover:bg-sea-50;
+    @apply btn bg-white text-sea-700 shadow-[inset_0_0_0_2px_theme(colors.sea.700)] hover:bg-sea-50;
   }
   .btn-ghost {
-    @apply btn text-sea-800 hover:bg-sea-50;
+    @apply btn font-sans text-sm font-semibold text-sea-700 hover:bg-sea-50;
   }
   .btn-danger {
     @apply btn bg-danger-600 text-white hover:bg-danger-700;
   }
   .card {
-    @apply rounded-2xl bg-white shadow-card ring-1 ring-sea-900/5;
+    @apply rounded-xl bg-white shadow-card ring-1 ring-sea-900/5;
+  }
+  /* A sign: the enamel plate. The white inset rule is painted on the plate itself (no inner box). */
+  .plate {
+    @apply rounded-[10px] bg-sea-700 text-white;
+    box-shadow:
+      inset 0 0 0 4px theme(colors.sea.700),
+      inset 0 0 0 6px #fff,
+      0 1px 1px rgba(17, 31, 71, 0.12),
+      0 6px 14px -8px rgba(17, 31, 71, 0.45);
+  }
+  /* Content area of a plate: keeps text clear of the rule. */
+  .plate-face {
+    @apply h-full p-1.5;
   }
   .input {
-    @apply block w-full scroll-mt-24 rounded-xl border border-sand-400 bg-white px-3.5 py-2.5 text-base text-ink placeholder:text-ink-muted focus:border-sea-500 focus:outline-none focus:ring-2 focus:ring-sea-200 disabled:cursor-not-allowed disabled:bg-sand-100 aria-[invalid=true]:border-danger-600 sm:text-sm;
+    @apply block w-full scroll-mt-24 rounded-lg border border-sand-400 bg-white px-3.5 py-2.5 text-base text-ink placeholder:text-ink-muted focus:border-sea-500 focus:outline-none focus:ring-2 focus:ring-sea-200 disabled:cursor-not-allowed disabled:bg-sand-100 aria-[invalid=true]:border-danger-600 sm:text-sm;
   }
   .label {
     @apply mb-1.5 block text-sm font-medium text-ink;
@@ -57,7 +75,7 @@
     @apply py-14 sm:py-20;
   }
   .carousel-btn {
-    @apply grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/30;
+    @apply plate grid h-11 w-11 place-items-center transition-colors hover:bg-sea-800;
   }
   .badge {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;

@@ -7,7 +7,7 @@ import { fmt, getDictionary, isLocale, pick } from "@/i18n";
 import { reconcileWithStripe } from "@/lib/booking-service";
 import { getRepository } from "@/lib/data";
 import { buildIcal } from "@/lib/ical";
-import { shown } from "@/lib/placeholder";
+import { publicContact, shown } from "@/lib/placeholder";
 import { formatMoney } from "@/lib/pricing";
 import { getSiteData } from "@/lib/site";
 import { tokenMatches } from "@/lib/tokens";
@@ -60,6 +60,7 @@ export default async function ConfirmationPage({ params, searchParams }: PagePro
   const dateFmt = new Intl.DateTimeFormat(locale === "bg" ? "bg-BG" : "en-GB", { weekday: "short", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
   const showDate = (d: string) => dateFmt.format(new Date(`${d}T00:00:00Z`));
 
+  const contact = publicContact(property, demo);
   const active = booking.status === "pending" || booking.status === "confirmed";
   const replyTime = shown(pick(property.replyTime, locale), demo);
   const arrival = fmt(t.confirmation.nextArrival, { time: property.checkInTime });
@@ -78,11 +79,11 @@ export default async function ConfirmationPage({ params, searchParams }: PagePro
           end: booking.checkOut,
           summary: fmt(t.confirmation.icsSummary, { name: property.name }),
           description: `${t.confirmation.reference}: ${booking.reference}\n${t.common.checkIn}: ${t.common.after} ${property.checkInTime}\n${t.common.checkOut}: ${t.common.before} ${property.checkOutTime}`,
-          location: property.address,
+          location: contact.address ?? undefined,
         },
       ])
     : null;
-  const mailto = `mailto:${property.contactEmail}?subject=${encodeURIComponent(fmt(t.confirmation.emailSubject, { ref: booking.reference }))}`;
+  const mailto = contact.email && `mailto:${contact.email}?subject=${encodeURIComponent(fmt(t.confirmation.emailSubject, { ref: booking.reference }))}`;
 
   return (
     <section className="section">
@@ -157,27 +158,29 @@ export default async function ConfirmationPage({ params, searchParams }: PagePro
           <h2 id="contact-title" className="text-xl">{t.confirmation.contactTitle}</h2>
           <p className="mt-1 text-ink-muted">{fmt(t.confirmation.contactText, { ref: booking.reference })}</p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <a href={mailto} className="btn-outline">
-              <Mail className="h-4 w-4" aria-hidden />
-              {t.confirmation.emailHost}
-            </a>
-            {property.contactPhone && (
-              <a href={`tel:${property.contactPhone.replace(/\s/g, "")}`} className="btn-outline">
+            {mailto && (
+              <a href={mailto} className="btn-outline">
+                <Mail className="h-4 w-4" aria-hidden />
+                {t.confirmation.emailHost}
+              </a>
+            )}
+            {contact.phone && (
+              <a href={`tel:${contact.phone.replace(/\s/g, "")}`} className="btn-outline">
                 <Phone className="h-4 w-4" aria-hidden />
-                {fmt(t.confirmation.callHost, { phone: property.contactPhone })}
+                {fmt(t.confirmation.callHost, { phone: contact.phone })}
               </a>
             )}
           </div>
-          {property.address && (
+          {contact.address && (
             <p className="mt-5 flex items-start gap-2 text-sm text-ink">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-clay-500" aria-hidden />
               {property.mapUrl ? (
                 <a href={property.mapUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-sea-800">
-                  {property.address}
+                  {contact.address}
                   <span className="sr-only"> ({t.common.opensInNewTab})</span>
                 </a>
               ) : (
-                property.address
+                contact.address
               )}
             </p>
           )}
