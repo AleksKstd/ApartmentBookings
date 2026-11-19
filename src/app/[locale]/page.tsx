@@ -32,8 +32,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       />
 
       <section className="section">
-        <div className="container grid grid-cols-1 items-start gap-12 lg:grid-cols-[1.25fr_1fr] lg:gap-16">
-          <div>
+        <div className="container">
+          <div className="max-w-3xl">
             <h2 className="text-3xl sm:text-4xl">{pick(homepage.introTitle, locale)}</h2>
             <p className="mt-5 max-w-prose whitespace-pre-line text-lg leading-relaxed text-ink-muted">{pick(homepage.introText, locale)}</p>
             <FactLine property={property} pricing={pricing} t={t} className="mt-6" />
@@ -43,9 +43,17 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
               <span className="text-sm text-ink-muted"> / {t.common.night}</span>
             </p>
           </div>
-          <Nearby items={homepage.nearby} locale={locale} demo={demo} title={t.home.nearbyTitle} />
         </div>
       </section>
+
+      <Nearby
+        items={homepage.nearby}
+        locale={locale}
+        demo={demo}
+        title={t.home.nearbyTitle}
+        startLabel={t.home.nearbyStart}
+        exampleNote={t.home.nearbyExample}
+      />
 
       <section className="section bg-white">
         <div className="container">

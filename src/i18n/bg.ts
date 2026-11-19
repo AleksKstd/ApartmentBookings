@@ -74,6 +74,8 @@ const bg = {
   home: {
     factsTitle: "Накратко",
     nearbyTitle: "От входната врата",
+    nearbyStart: "Входната врата",
+    nearbyExample: "пример",
     galleryTitle: "Вътре в апартамента",
     amenitiesTitle: "Какво има в апартамента",
     hostTitle: "Вашият домакин",

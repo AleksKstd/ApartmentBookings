@@ -75,6 +75,8 @@ const en: Dictionary = {
   home: {
     factsTitle: "At a glance",
     nearbyTitle: "From the door",
+    nearbyStart: "The front door",
+    nearbyExample: "example",
     galleryTitle: "Inside the apartment",
     amenitiesTitle: "What's provided",
     hostTitle: "Your host",
