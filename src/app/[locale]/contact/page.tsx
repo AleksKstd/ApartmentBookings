@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Mail, MapPin, Phone } from "lucide-react";
-import { getDictionary, isLocale } from "@/i18n";
+import { getDictionary, isLocale, pick } from "@/i18n";
+import { shown } from "@/lib/placeholder";
 import { getSiteData } from "@/lib/site";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/contact">): Promise<Metadata> {
@@ -14,7 +15,8 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getDictionary(locale);
-  const { property } = await getSiteData();
+  const { property, demo } = await getSiteData();
+  const replyTime = shown(pick(property.replyTime, locale), demo) ?? t.contact.responseTime;
   const items = [
     { icon: Mail, label: t.common.email, value: property.contactEmail, href: `mailto:${property.contactEmail}` },
     { icon: Phone, label: t.common.phone, value: property.contactPhone, href: `tel:${property.contactPhone.replace(/\s/g, "")}` },
@@ -45,7 +47,7 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
             </li>
           ))}
         </ul>
-        <p className="mt-6 text-ink-muted">{t.contact.responseTime}</p>
+        <p className="mt-6 text-lg text-ink">{replyTime}</p>
         <Link href={`/${locale}/booking`} className="btn-primary mt-8 px-6 py-3 text-base">
           {t.common.checkAvailability}
         </Link>

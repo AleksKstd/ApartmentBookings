@@ -11,7 +11,11 @@
     @apply bg-sand-50 font-sans text-ink antialiased;
   }
   h1, h2, h3 {
-    @apply font-serif tracking-tight text-sea-900;
+    @apply font-serif font-medium tracking-tight text-sea-900;
+    text-wrap: balance;
+  }
+  p, li, dd {
+    text-wrap: pretty;
   }
   :focus-visible {
     @apply outline-none ring-2 ring-clay-500 ring-offset-2 ring-offset-sand-50;
@@ -51,9 +55,6 @@
   }
   .section {
     @apply py-14 sm:py-20;
-  }
-  .eyebrow {
-    @apply text-xs font-semibold uppercase tracking-[0.18em] text-clay-700;
   }
   .carousel-btn {
     @apply grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/30;

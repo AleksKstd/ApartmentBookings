@@ -466,19 +466,19 @@ export async function deleteMediaItem(id: string): Promise<ActionResult> {
 
 export async function saveHomepage(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   return guarded(async () => {
-    const count = Math.min(Number(formData.get("highlightCount")) || 0, 12);
-    const highlights: HomepageContent["highlights"] = [];
+    const count = Math.min(Number(formData.get("nearbyCount")) || 0, 12);
+    const nearby: HomepageContent["nearby"] = [];
     for (let i = 0; i < count; i++) {
-      if (formData.get(`highlights.${i}.remove`) === "on") continue;
-      const item = { title: localized(formData, `highlights.${i}.title`, 120), text: localized(formData, `highlights.${i}.text`, 400) };
-      if (item.title.bg || item.title.en) highlights.push(item);
+      if (formData.get(`nearby.${i}.remove`) === "on") continue;
+      const item = { place: localized(formData, `nearby.${i}.place`, 80), distance: localized(formData, `nearby.${i}.distance`, 40) };
+      if (item.place.bg || item.place.en) nearby.push(item);
     }
     const homepage: HomepageContent = {
       heroTitle: localized(formData, "heroTitle", 120),
       heroSubtitle: localized(formData, "heroSubtitle", 300),
       introTitle: localized(formData, "introTitle", 120),
       introText: localized(formData, "introText", 3000),
-      highlights,
+      nearby,
       locationTitle: localized(formData, "locationTitle", 120),
       locationText: localized(formData, "locationText", 1000),
       ctaTitle: localized(formData, "ctaTitle", 120),
@@ -509,6 +509,7 @@ export async function saveProperty(_prev: ActionResult | null, formData: FormDat
     if (mapUrl && !/^https:\/\//.test(mapUrl)) return fail("Линкът към картата трябва да започва с https://");
     const email = str(formData, "contactEmail", 254);
     if (!z.email().safeParse(email).success) return fail("Невалиден имейл за контакт.");
+    const current = (await getRepository().getSettings()).property;
     const property: PropertyInfo = {
       name: str(formData, "name", 80),
       tagline: localized(formData, "tagline", 200),
@@ -528,6 +529,12 @@ export async function saveProperty(_prev: ActionResult | null, formData: FormDat
       houseRules: localized(formData, "houseRules", 3000),
       contactEmail: email,
       contactPhone: str(formData, "contactPhone", 40),
+      // Host and terms are edited in their own form (saveHostInfo); keep the stored values.
+      hostName: current.hostName,
+      hostPhotoUrl: current.hostPhotoUrl,
+      hostBio: current.hostBio,
+      replyTime: current.replyTime,
+      cancellationPolicy: current.cancellationPolicy,
     };
     if (!property.name) return fail("Името на обекта е задължително.");
     await getRepository().saveSettings("property", property);
@@ -536,3 +543,23 @@ export async function saveProperty(_prev: ActionResult | null, formData: FormDat
   });
 }
 
+export async function saveHostInfo(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  return guarded(async () => {
+    const repo = getRepository();
+    const { property: current } = await repo.getSettings();
+    const photo = str(formData, "hostPhotoUrl", 500);
+    // Only a photo from the media library may be chosen.
+    if (photo && !(await repo.listMedia()).some((m) => m.url === photo)) return fail("Избраната снимка не е намерена.");
+    const property: PropertyInfo = {
+      ...current,
+      hostName: str(formData, "hostName", 80),
+      hostPhotoUrl: photo,
+      hostBio: localized(formData, "hostBio", 600),
+      replyTime: localized(formData, "replyTime", 120),
+      cancellationPolicy: localized(formData, "cancellationPolicy", 1500),
+    };
+    await repo.saveSettings("property", property);
+    refreshEverything();
+    return ok("Данните за домакина и условията са запазени.");
+  });
+}

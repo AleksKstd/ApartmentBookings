@@ -52,6 +52,13 @@ export interface PropertyInfo {
   houseRules: Localized;
   contactEmail: string;
   contactPhone: string;
+  // Host and booking terms, shown where guests decide. A value wrapped in [square brackets] is a
+  // placeholder: admin shows it, the public site hides it (except in demo mode). See lib/placeholder.ts.
+  hostName: string;
+  hostPhotoUrl: string; // a media URL, or "" for none
+  hostBio: Localized;
+  replyTime: Localized; // e.g. "Usually replies within a few hours"
+  cancellationPolicy: Localized;
 }
 
 export interface HomepageContent {
@@ -59,7 +66,8 @@ export interface HomepageContent {
   heroSubtitle: Localized;
   introTitle: Localized;
   introText: Localized;
-  highlights: { title: Localized; text: Localized }[];
+  /** "From the door": nearby places and how far they are. */
+  nearby: { place: Localized; distance: Localized }[];
   locationTitle: Localized;
   locationText: Localized;
   ctaTitle: Localized;

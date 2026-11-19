@@ -95,7 +95,7 @@ export function HeroCarousel({
 
       <div className="container relative flex h-full flex-col justify-end pb-20 sm:pb-24">
         <div className="max-w-2xl animate-rise-in">
-          <h1 className="text-4xl font-semibold leading-tight text-white sm:text-6xl">{title}</h1>
+          <h1 className="text-4xl font-medium leading-tight text-white sm:text-6xl">{title}</h1>
           <p className="mt-4 text-lg text-sea-50/90 sm:text-xl">{subtitle}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href={primaryCta.href} className="btn-primary px-6 py-3 text-base">

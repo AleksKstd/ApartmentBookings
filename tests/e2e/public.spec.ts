@@ -17,7 +17,7 @@ test("root redirects by Accept-Language, defaulting to Bulgarian", async ({ brow
 
 test("homepage shows the carousel, facts and gallery", async ({ page }) => {
   await page.goto("/bg");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Вашият дом край морето");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Тих апартамент край Бургаския залив");
   const carousel = page.locator('[aria-roledescription="carousel"]');
   await expect(carousel).toBeVisible();
   await expect(carousel.locator('[aria-roledescription="slide"]')).toHaveCount(4);
@@ -27,7 +27,8 @@ test("homepage shows the carousel, facts and gallery", async ({ page }) => {
   await page.getByRole("button", { name: "Следваща снимка" }).click();
   await expect(carousel.locator('[aria-roledescription="slide"][aria-hidden="false"]')).toHaveAttribute("aria-label", "Снимка 2 от 4");
 
-  await expect(page.getByText("Спални")).toBeVisible();
+  await expect(page.getByRole("list", { name: "Накратко" })).toContainText("1 спалня");
+  await expect(page.getByRole("heading", { name: "От входната врата" })).toBeVisible();
   await expect(page.getByRole("button", { name: /Отвори снимка 1/ })).toBeVisible();
 });
 

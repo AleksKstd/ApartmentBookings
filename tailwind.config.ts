@@ -23,7 +23,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
-        serif: ["Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", "Cambria", "Times New Roman", "serif"],
+        serif: ["Spectral", "Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", "Cambria", "Times New Roman", "serif"],
       },
       boxShadow: {
         card: "0 1px 2px rgba(16,44,53,.06), 0 8px 24px -12px rgba(16,44,53,.18)",

@@ -1,23 +1,63 @@
-import { saveHomepage, saveProperty } from "@/app/admin/actions";
+import { saveHomepage, saveHostInfo, saveProperty } from "@/app/admin/actions";
 import { AdminForm, Field, LocalizedField } from "@/components/admin/form-kit";
 import { PageHeader, Panel } from "@/components/admin/ui";
 import bg from "@/i18n/bg";
 import { getRepository } from "@/lib/data";
 import { AMENITY_KEYS } from "@/lib/data/defaults";
+import { isPlaceholder } from "@/lib/placeholder";
 
 export const metadata = { title: "Съдържание" };
 
 const EMPTY = { bg: "", en: "" };
 
 export default async function ContentPage() {
-  const { homepage: h, property: p } = await getRepository().getSettings();
-  // Two blank rows so new highlights can be added without client-side code.
-  const highlights = [...h.highlights, { title: EMPTY, text: EMPTY }, { title: EMPTY, text: EMPTY }];
+  const repo = getRepository();
+  const [{ homepage: h, property: p }, media] = await Promise.all([repo.getSettings(), repo.listMedia()]);
+  // Two blank rows so new places can be added without client-side code.
+  const nearby = [...h.nearby, { place: EMPTY, distance: EMPTY }, { place: EMPTY, distance: EMPTY }];
+
+  // Starter values in [square brackets] are hidden on the public site until replaced.
+  const both = (v: { bg: string; en: string }) => isPlaceholder(v.bg) || isPlaceholder(v.en);
+  const todo = [
+    isPlaceholder(p.hostName) && "име на домакина",
+    both(p.hostBio) && "няколко думи за домакина",
+    both(p.replyTime) && "време за отговор",
+    both(p.cancellationPolicy) && "условия за анулиране",
+    h.nearby.some((n) => both(n.distance)) && "разстояния до места наблизо",
+  ].filter(Boolean);
 
   return (
     <>
       <PageHeader title="Съдържание" description="Текстовете се показват на двата езика. Ако английският превод липсва, се показва българският." />
+      {todo.length > 0 && (
+        <p className="mb-6 rounded-xl bg-warning-50 p-4 text-sm text-warning-800" role="note">
+          <strong>Попълнете примерните текстове.</strong> Полетата в [квадратни скоби] са примерни и не се показват на сайта,
+          докато не ги замените: {todo.join(", ")}.
+        </p>
+      )}
       <div className="space-y-6">
+        <Panel title="Домакин и условия за резервация">
+          <p className="mb-4 text-sm text-ink-muted">Показват се до формата за резервация и на страницата за потвърждение — там, където гостите решават.</p>
+          <AdminForm action={saveHostInfo} submitLabel="Запази домакина и условията">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Име на домакина" name="hostName" defaultValue={p.hostName} maxLength={80} />
+              <div>
+                <label className="label" htmlFor="f-hostPhotoUrl">Снимка на домакина</label>
+                <select id="f-hostPhotoUrl" name="hostPhotoUrl" defaultValue={p.hostPhotoUrl} className="input">
+                  <option value="">Без снимка (показват се инициали)</option>
+                  {media.map((m) => (
+                    <option key={m.id} value={m.url}>{m.alt.bg || m.url}</option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-ink-muted">Качете снимката в „Снимки“ и махнете отметките за карусел и галерия, ако не искате да се показва там.</p>
+              </div>
+            </div>
+            <LocalizedField label="Няколко думи за домакина" name="hostBio" value={p.hostBio} multiline maxLength={600} />
+            <LocalizedField label="Време за отговор (напр. „Обикновено отговаря до няколко часа“)" name="replyTime" value={p.replyTime} maxLength={120} />
+            <LocalizedField label="Условия за анулиране" name="cancellationPolicy" value={p.cancellationPolicy} multiline maxLength={1500} />
+          </AdminForm>
+        </Panel>
+
         <Panel title="Начална страница">
           <AdminForm action={saveHomepage} submitLabel="Запази началната страница">
             <LocalizedField label="Заглавие (върху карусела)" name="heroTitle" value={h.heroTitle} maxLength={120} />
@@ -25,14 +65,14 @@ export default async function ContentPage() {
             <LocalizedField label="Въведение — заглавие" name="introTitle" value={h.introTitle} maxLength={120} />
             <LocalizedField label="Въведение — текст" name="introText" value={h.introText} multiline rows={5} maxLength={3000} />
             <fieldset className="space-y-4 rounded-2xl border border-sand-200 p-4">
-              <legend className="px-2 font-semibold">Предимства</legend>
-              <input type="hidden" name="highlightCount" value={highlights.length} />
-              {highlights.map((item, i) => (
+              <legend className="px-2 font-semibold">Наблизо (разстояния от входа)</legend>
+              <input type="hidden" name="nearbyCount" value={nearby.length} />
+              {nearby.map((item, i) => (
                 <div key={i} className="space-y-3 border-b border-sand-200 pb-4 last:border-0">
-                  <LocalizedField label={i < h.highlights.length ? `Предимство ${i + 1} — заглавие` : "Ново предимство — заглавие"} name={`highlights.${i}.title`} value={item.title} maxLength={120} />
-                  <LocalizedField label="Текст" name={`highlights.${i}.text`} value={item.text} maxLength={400} />
-                  {i < h.highlights.length && (
-                    <label className="flex items-center gap-2 text-sm text-danger-700"><input type="checkbox" name={`highlights.${i}.remove`} /> Премахни</label>
+                  <LocalizedField label={i < h.nearby.length ? `Място ${i + 1}` : "Ново място"} name={`nearby.${i}.place`} value={item.place} maxLength={80} />
+                  <LocalizedField label="Разстояние (напр. „5 мин пеша“)" name={`nearby.${i}.distance`} value={item.distance} maxLength={40} />
+                  {i < h.nearby.length && (
+                    <label className="flex items-center gap-2 text-sm text-danger-700"><input type="checkbox" name={`nearby.${i}.remove`} /> Премахни</label>
                   )}
                 </div>
               ))}

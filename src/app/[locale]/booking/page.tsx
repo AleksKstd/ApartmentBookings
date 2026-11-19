@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BookingWidget } from "@/components/booking/booking-widget";
-import { getDictionary, isLocale } from "@/i18n";
+import { getDictionary, isLocale, pick } from "@/i18n";
 import { occupiedNights } from "@/lib/availability";
 import { HOLD_MINIMUM_MINUTES, loadAvailabilityContext } from "@/lib/booking-service";
 import { addDays, isIsoDate } from "@/lib/dates";
+import { shown } from "@/lib/placeholder";
 import { getSiteData } from "@/lib/site";
 import { isStripeConfigured } from "@/lib/stripe";
 
@@ -18,7 +19,8 @@ export default async function BookingPage({ params, searchParams }: PageProps<"/
   if (!isLocale(locale)) notFound();
   const query = await searchParams;
   const t = getDictionary(locale);
-  await getSiteData(); // marks the page dynamic and warms the per-request cache
+  const { property, demo } = await getSiteData(); // also marks the page dynamic and warms the per-request cache
+  const paymentsEnabled = isStripeConfigured();
   const { settings, seasons, ranges, today } = await loadAvailabilityContext();
   const lastDay = addDays(today, settings.pricing.bookingWindowDays);
   const str = (v: string | string[] | undefined) => (typeof v === "string" ? v : undefined);
@@ -28,7 +30,7 @@ export default async function BookingPage({ params, searchParams }: PageProps<"/
   return (
     <section className="section">
       <div className="container">
-        <h1 className="text-4xl sm:text-5xl">{t.booking.title}</h1>
+        <h1 className="text-4xl sm:text-5xl">{paymentsEnabled ? t.booking.title : t.booking.titleRequest}</h1>
         <p className="mb-10 mt-3 text-lg text-ink-muted">{t.booking.subtitle}</p>
         <BookingWidget
           locale={locale}
@@ -41,7 +43,16 @@ export default async function BookingPage({ params, searchParams }: PageProps<"/
           seasonMinNights={seasons
             .filter((s) => s.minNights != null && s.endDate >= today)
             .map((s) => ({ startDate: s.startDate, endDate: s.endDate, minNights: s.minNights! }))}
-          paymentsEnabled={isStripeConfigured()}
+          paymentsEnabled={paymentsEnabled}
+          trust={{
+            hostName: shown(property.hostName, demo),
+            hostPhotoUrl: property.hostPhotoUrl || null,
+            replyTime: shown(pick(property.replyTime, locale), demo),
+            cancellationPolicy: shown(pick(property.cancellationPolicy, locale), demo),
+            houseRules: pick(property.houseRules, locale).split("\n").map((r) => r.trim()).filter(Boolean),
+            checkInTime: property.checkInTime,
+            checkOutTime: property.checkOutTime,
+          }}
           holdMinutes={Math.max(HOLD_MINIMUM_MINUTES, settings.pricing.holdMinutes)}
           initial={{
             checkIn: initialIn && isIsoDate(initialIn) && initialIn >= today ? initialIn : undefined,

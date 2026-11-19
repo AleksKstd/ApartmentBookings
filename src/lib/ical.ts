@@ -94,7 +94,7 @@ const compactDay = (day: string) => day.replace(/-/g, "");
 
 export function buildIcal(
   calendarName: string,
-  events: { uid: string; start: string; end: string; summary: string; description?: string }[],
+  events: { uid: string; start: string; end: string; summary: string; description?: string; location?: string }[],
   now: Date = new Date(),
 ): string {
   const stamp = now.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
@@ -114,6 +114,7 @@ export function buildIcal(
       `DTEND;VALUE=DATE:${compactDay(e.end)}`,
       `SUMMARY:${escapeText(e.summary)}`,
       ...(e.description ? [`DESCRIPTION:${escapeText(e.description)}`] : []),
+      ...(e.location ? [`LOCATION:${escapeText(e.location)}`] : []),
       "TRANSP:OPAQUE",
       "END:VEVENT",
     ]),

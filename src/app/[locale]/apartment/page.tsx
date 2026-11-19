@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Clock, MapPin } from "lucide-react";
 import { AmenityList } from "@/components/site/amenity-list";
-import { Facts } from "@/components/site/facts";
+import { FactLine } from "@/components/site/facts";
+import { MapEmbed } from "@/components/site/map-embed";
 import { SectionHeading } from "@/components/site/section-heading";
 import { getDictionary, isLocale, pick } from "@/i18n";
 import { formatMoney } from "@/lib/pricing";
@@ -29,9 +30,9 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/apa
       <section className="bg-white">
         <div className="container grid grid-cols-1 gap-10 py-12 sm:py-16 lg:grid-cols-2 lg:items-center">
           <div>
-            <p className="eyebrow mb-2">{pick(property.city, locale)}</p>
             <h1 className="text-4xl sm:text-5xl">{property.name}</h1>
             <p className="mt-4 text-xl text-ink-muted">{pick(property.tagline, locale)}</p>
+            <FactLine property={property} pricing={pricing} t={t} className="mt-5" />
             <p className="mt-6 text-sea-800">
               <span className="text-sm text-ink-muted">{t.apartment.pricesFrom} </span>
               <span className="text-2xl font-semibold">{formatMoney(lowestNightly, pricing.currency, locale)}</span>
@@ -50,8 +51,6 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/apa
 
       <section className="section">
         <div className="container space-y-14">
-          <Facts property={property} pricing={pricing} t={t} />
-
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.4fr_1fr]">
             <div>
               <SectionHeading title={t.apartment.aboutTitle} />
@@ -98,17 +97,20 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/apa
               {property.address}
             </p>
             {property.latitude != null && property.longitude != null && (
-              <iframe
-                title={t.apartment.locationTitle}
-                className="mt-6 h-80 w-full rounded-2xl border-0 shadow-card"
-                loading="lazy"
-                referrerPolicy="no-referrer"
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.01}%2C${property.latitude - 0.006}%2C${property.longitude + 0.01}%2C${property.latitude + 0.006}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`}
-              />
+              <div className="mt-6">
+                <MapEmbed
+                  title={t.apartment.locationTitle}
+                  address={property.address}
+                  showLabel={t.common.showMap}
+                  note={t.common.mapNote}
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.01}%2C${property.latitude - 0.006}%2C${property.longitude + 0.01}%2C${property.latitude + 0.006}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`}
+                />
+              </div>
             )}
             {property.mapUrl && (
               <a href={property.mapUrl} target="_blank" rel="noopener noreferrer" className="btn-outline mt-4">
                 {t.common.openMap}
+                <span className="sr-only"> ({t.common.opensInNewTab})</span>
               </a>
             )}
           </div>

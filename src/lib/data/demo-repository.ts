@@ -100,7 +100,12 @@ export class DemoRepository implements Repository {
   }
 
   getSettings() {
-    return this.read((db) => db.settings);
+    // Merge over defaults so fields added after the demo data was created always have a value.
+    return this.read((db) => ({
+      property: { ...DEFAULT_SETTINGS.property, ...db.settings.property },
+      homepage: { ...DEFAULT_SETTINGS.homepage, ...db.settings.homepage },
+      pricing: { ...DEFAULT_SETTINGS.pricing, ...db.settings.pricing },
+    }));
   }
 
   async saveSettings<K extends keyof SiteSettings>(key: K, value: SiteSettings[K]) {

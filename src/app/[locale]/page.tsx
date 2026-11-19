@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { AmenityList } from "@/components/site/amenity-list";
-import { Facts } from "@/components/site/facts";
+import { FactLine } from "@/components/site/facts";
 import { Gallery } from "@/components/site/gallery";
 import { HeroCarousel } from "@/components/site/hero-carousel";
+import { HostCard } from "@/components/site/host-card";
+import { Nearby } from "@/components/site/nearby";
 import { SectionHeading } from "@/components/site/section-heading";
 import { getDictionary, isLocale, pick } from "@/i18n";
+import { shown } from "@/lib/placeholder";
 import { formatMoney } from "@/lib/pricing";
 import { getSiteData } from "@/lib/site";
 
@@ -14,7 +17,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getDictionary(locale);
-  const { property, homepage, pricing, carousel, gallery, lowestNightly } = await getSiteData();
+  const { property, homepage, pricing, carousel, gallery, lowestNightly, demo } = await getSiteData();
   const slides = (carousel.length ? carousel : gallery.slice(0, 1)).map((m) => ({ id: m.id, url: m.url, alt: pick(m.alt, locale) }));
 
   return (
@@ -29,42 +32,22 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       />
 
       <section className="section">
-        <div className="container grid grid-cols-1 items-start gap-12 lg:grid-cols-[1.2fr_1fr]">
+        <div className="container grid grid-cols-1 items-start gap-12 lg:grid-cols-[1.25fr_1fr] lg:gap-16">
           <div>
-            <p className="eyebrow mb-2">{pick(property.city, locale)}</p>
             <h2 className="text-3xl sm:text-4xl">{pick(homepage.introTitle, locale)}</h2>
-            <p className="mt-5 whitespace-pre-line text-lg leading-relaxed text-ink-muted">{pick(homepage.introText, locale)}</p>
+            <p className="mt-5 max-w-prose whitespace-pre-line text-lg leading-relaxed text-ink-muted">{pick(homepage.introText, locale)}</p>
+            <FactLine property={property} pricing={pricing} t={t} className="mt-6" />
             <p className="mt-6 text-sea-800">
               <span className="text-sm text-ink-muted">{t.apartment.pricesFrom} </span>
-              <span className="text-2xl font-semibold">{formatMoney(lowestNightly, pricing.currency, locale)}</span>
+              <span className="text-2xl font-semibold tabular-nums">{formatMoney(lowestNightly, pricing.currency, locale)}</span>
               <span className="text-sm text-ink-muted"> / {t.common.night}</span>
             </p>
           </div>
-          <div>
-            <h3 className="sr-only">{t.home.factsTitle}</h3>
-            <Facts property={property} pricing={pricing} t={t} compact />
-          </div>
+          <Nearby items={homepage.nearby} locale={locale} demo={demo} title={t.home.nearbyTitle} />
         </div>
       </section>
 
-      {homepage.highlights.length > 0 && (
-        <section className="section bg-white">
-          <div className="container">
-            <SectionHeading title={t.home.highlightsTitle} />
-            <ul className="grid grid-cols-1 gap-6 md:grid-cols-3">
-              {homepage.highlights.map((h, i) => (
-                <li key={i} className="rounded-2xl bg-sand-100 p-6">
-                  <Check className="h-6 w-6 text-clay-500" aria-hidden />
-                  <h3 className="mt-4 text-xl">{pick(h.title, locale)}</h3>
-                  <p className="mt-2 text-ink-muted">{pick(h.text, locale)}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-      )}
-
-      <section className="section">
+      <section className="section bg-white">
         <div className="container">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <SectionHeading title={t.home.galleryTitle} />
@@ -82,15 +65,23 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         </div>
       </section>
 
-      <section className="section bg-white">
+      <section className="section">
         <div className="container">
           <SectionHeading title={t.home.amenitiesTitle} />
           <AmenityList amenities={property.amenities} t={t} limit={9} />
           <Link href={`/${locale}/apartment`} className="btn-outline mt-8">
-            {t.common.learnMore}
+            {t.apartment.amenitiesTitle}
           </Link>
         </div>
       </section>
+
+      {shown(property.hostName, demo) && (
+        <div className="section bg-white">
+          <div className="container">
+            <HostCard property={property} locale={locale} demo={demo} title={t.home.hostTitle} />
+          </div>
+        </div>
+      )}
 
       <section className="section">
         <div className="container grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
@@ -103,6 +94,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             {property.mapUrl && (
               <a href={property.mapUrl} target="_blank" rel="noopener noreferrer" className="btn-outline mt-6">
                 {t.common.openMap}
+                <span className="sr-only"> ({t.common.opensInNewTab})</span>
               </a>
             )}
           </div>
@@ -118,3 +110,4 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
     </>
   );
 }
+

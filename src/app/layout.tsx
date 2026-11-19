@@ -2,6 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { htmlLang, isLocale } from "@/i18n";
 import { siteUrl } from "@/lib/site-url";
+// Self-hosted display serif with Cyrillic (served from our own origin, no third-party font requests).
+import "@fontsource/spectral/400.css";
+import "@fontsource/spectral/500.css";
+import "@fontsource/spectral/600.css";
 import "./globals.css";
 
 export const metadata: Metadata = {

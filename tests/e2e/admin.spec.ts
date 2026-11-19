@@ -25,11 +25,11 @@ test("a forged session cookie is rejected", async ({ page, context, baseURL }) =
 test("admin edits homepage content and it appears on the site", async ({ page }) => {
   await adminLogin(page);
   await page.goto("/admin/content");
-  await page.getByLabel("Заглавие (върху карусела) (en)").fill("Seaside calm in Varna");
+  await page.getByLabel("Заглавие (върху карусела) (en)").fill("Seaside calm in Burgas");
   await page.getByRole("button", { name: "Запази началната страница" }).click();
   await expect(page.getByText("Началната страница е запазена.")).toBeVisible();
   await page.goto("/en");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Seaside calm in Varna");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Seaside calm in Burgas");
 });
 
 test("admin changes pricing and the quote follows", async ({ page, request }) => {

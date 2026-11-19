@@ -61,7 +61,7 @@ export function Gallery({
         {photos.map((photo, i) => (
           <li
             key={photo.id}
-            className={cn(variant === "preview" && i === 0 && "col-span-2 row-span-2", variant === "full" && i % 5 === 0 && "md:col-span-2 md:row-span-2")}
+            className={cn(variant === "preview" && i === 0 && "col-span-2 row-span-2", variant === "full" && fullSpan(i, count))}
           >
             <button
               type="button"
@@ -77,7 +77,10 @@ export function Gallery({
                 src={photo.url}
                 alt={photo.alt}
                 loading="lazy"
-                className="aspect-[4/3] h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className={cn(
+                  "aspect-[4/3] h-full w-full object-cover transition-transform duration-500 group-hover:scale-105",
+                  variant === "full" && /md:col-span-3/.test(fullSpan(i, count)) && "md:aspect-[21/9]",
+                )}
               />
             </button>
           </li>
@@ -119,4 +122,22 @@ export function Gallery({
       </dialog>
     </>
   );
+}
+
+/**
+ * Full gallery layout that never leaves holes: the first photo is large (2×2 on a 3-column grid), and
+ * the last photo widens to close an incomplete final row (on phones too, where the grid has 2 columns).
+ */
+function fullSpan(i: number, count: number): string {
+  const classes: string[] = [];
+  const last = i === count - 1;
+  if (last && count % 2 === 1 && !(count >= 3 && i === 0)) classes.push("col-span-2");
+  if (count >= 3 && i === 0) classes.push("md:col-span-2 md:row-span-2");
+  else if (last && count >= 3) {
+    const rest = (count - 3) % 3; // photos after the first two rows
+    if (rest === 1) classes.push("md:col-span-3");
+    else if (rest === 2) classes.push("md:col-span-2");
+    else if (count % 2 === 1) classes.push("md:col-span-1");
+  }
+  return classes.join(" ");
 }
